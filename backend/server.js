@@ -1,5 +1,6 @@
 const express = require('express');
 const connectDB = require("./config/db");
+const cors = require('cors');
 const dotenv = require("dotenv").config();
 const port = 5000;
 
@@ -16,11 +17,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use(cors());
+
 
 // Routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
-app.use('/decks/:deckId/flashcards', flashcardRoutes);
+app.use('/flashcards', flashcardRoutes);
 app.use('/decks', deckRoutes);
 
 

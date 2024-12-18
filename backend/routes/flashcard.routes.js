@@ -1,12 +1,21 @@
 const express = require('express');
-const { getFlashcards, getFlashcardById, setFlashcards, createFlashcard, modifyFlashcard, deleteFlashcard } = require('../controllers/flashcard.controller');
+const { getFlashcardById, createFlashcard, modifyFlashcard, deleteFlashcard, getAllFlashcards, getAllFlashcardsByUserId, getAllFlashcardsByDeckId } = require('../controllers/flashcard.controller');
 const router = express.Router();
 
+ // Renvoie tout les flashcards de tout les utilisateurs
 router.get("/", getAllFlashcards);
-router.get("/:deckId", getAllFlashcards)
+
+// Renvoie tout les flashcards de l'utilisateur
+router.get("/:userId", getAllFlashcardsByUserId);
+
+// Renvoie tout les flashcards du deck
+router.get("/decks/:deckId", getAllFlashcardsByDeckId);
+
+// Renvoie la flashcard à partir de son id
 router.get("/:deckId/:id", getFlashcardById);
-router.post("/", createFlashcard);
-router.patch("/:id", modifyFlashcard); // S'applique lors de chaque modification de la Flashcard
+
+router.post("/:deckId", createFlashcard);
+router.patch("/:id", modifyFlashcard); 
 router.delete("/:id", deleteFlashcard);
 
 module.exports = router;

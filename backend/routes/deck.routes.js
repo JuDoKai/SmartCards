@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get("/", getAllDecks);
 router.get("/:id", getAllDecksByUserIdOrDeckId);
-router.post("/", createDeck);
+router.post("/:userId", createDeck);
 router.patch("/:id", updateDeck);
 router.delete("/:id", deleteDeck);
 

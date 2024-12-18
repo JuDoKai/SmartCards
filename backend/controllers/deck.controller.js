@@ -5,6 +5,7 @@ module.exports.getAllDecks = async (req, res) => {
     try {
       const decks = await Deck.find()
             .populate('user', 'username')
+            .populate('flashcards')
             .exec();
       res.status(200).json(decks);
     } catch (error) {
@@ -55,21 +56,18 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
 
 module.exports.createDeck = async (req, res) => {
     try {
-        const { title, description, user } = req.body;
+        const { title, description } = req.body;
+        const { userId } = req.params;
+  
 
-      if (!title || !user) {
-        return res.status(400).json({ message: "Le titre et l'utilisateur sont requis." });
-      }
-
-      const existingUser = await User.findById(user);
-      if (!existingUser) {
-        return res.status(404).json({ message: "Utilisateur non trouvé." });
+      if (!title) {
+        return res.status(400).json({ message: "Le titre est requis." });
       }
 
         const newDeck = new Deck({
             title,
             description,
-            user,
+            user: userId,
           });
 
         const savedDeck = await newDeck.save();
