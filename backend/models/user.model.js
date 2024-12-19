@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt"); 
 
 const userSchema = mongoose.Schema(
     {
@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema(
             match: [/.+\@.+\..+/, "Veuillez entrer une adresse email valide"],
         },
         password: { type: String, required: true },
+        decks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Deck' }],
     },
     { timestamps: true } 
 );

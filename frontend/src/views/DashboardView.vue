@@ -18,7 +18,7 @@ import Navbar from '@/components/Navbar.vue';
 import Filter from '@/components/Filter.vue';
 import { ref } from 'vue';
 
-const deck = ref([])
+const deck = ref([]);
 
 
 </script>

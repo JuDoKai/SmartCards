@@ -15,11 +15,14 @@ module.exports.register = async (req, res, next) => {
 };
 
 module.exports.login = async (req, res, next) => {
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
   try {
-    const user = await UserModel.findOne({ username });
+    const user = await UserModel.findOne({
+      $or: [{ username }, { email }]
+    });
+
     if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     const passwordMatch = await user.comparePassword(password);
@@ -38,8 +41,15 @@ module.exports.login = async (req, res, next) => {
 
 module.exports.getAllUsers = async (req, res) => {
   try {
-    const users = await UserModel.find();
-    if (!users) {
+    const users = await UserModel.find()
+    .populate({
+      path: "decks",
+      populate: {
+        path: "flashcards",  // Si vous avez une relation flashcards dans le deck
+        model: "Flashcard"
+      }
+    });
+        if (!users) {
       return res.status(404).json({ message: 'No users found.' });
     }
     res.status(200).json(users);
