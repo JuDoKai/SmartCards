@@ -3,14 +3,13 @@
         <div class="title">
             <h1>SmartCards</h1>
         </div>
-        <Login></Login>
+        <Auth></Auth>
     </div>
-    
 </template>
 
 
 <script setup>
-import Login from '@/components/Login.vue';
+import Auth from '@/components/Auth.vue';
 </script>
 
 <style scoped>
