@@ -3,18 +3,26 @@
         <a href="/dashboard">SmartCards</a>
         <div class="log">
             <p> {{ user.name }}</p>
-            <p>Se Déconnecter</p>
+            <button @click="logout">Se Déconnecter</button>
         </div>
     </nav>
 </template>
 
 <script setup>
+import router from '@/router';
 
 const user = defineProps({
     name: String
-})
+});
+
+const logout = () => {
+    localStorage.removeItem('authToken');
+
+    router.push('/');
+}
 
 </script>
+
 
 
 <style scoped>

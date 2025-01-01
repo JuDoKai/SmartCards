@@ -38,8 +38,8 @@ export const getDecksByUserId = async(userId) => {
     const response = await axios.get(`${BASE_URL}/decks/${userId}`);
     return response.data; 
 }
-export const createDeck = async(userId) => {
-    const response = await axios.post(`${BASE_URL}/decks/${userId}`);
+export const createDeck = async(userId, deckData) => {
+    const response = await axios.post(`${BASE_URL}/decks/${userId}`, deckData);
     return response.data; 
 }
 export const updateDeck = async(deckId) => {

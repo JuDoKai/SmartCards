@@ -74,9 +74,9 @@ const toggleMode = () => {
 
 const loginHandler = async () => {
     try {
-        const response = await loginService({
+            await loginService({
             username: textOrEmail.value,
-            password: password.value,
+            password: password.value
         });
 
         router.push('/dashboard');

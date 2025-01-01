@@ -17,10 +17,7 @@ export const login = async ({ username, password }) => {
         localStorage.setItem('authToken', token);
 
         console.log('Connexion réussie', token);
-        /*
-        const decoded = jwtDecode(token);
-        console.log(decoded.userId);
-        */
+      
         return token;
     } catch (error) {
         console.error('Erreur lors de la connexion:', error);

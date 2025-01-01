@@ -1,16 +1,17 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue';
 import Filter from '@/components/Filter.vue';
+import CreateDeck from '@/components/CreateDeck.vue';
 import { ref, onMounted } from 'vue';
 
 import { jwtDecode } from 'jwt-decode';
 
-const deck = ref([]);
 import { getUserById, getDecksByUserId } from '../../services/apiService';
+import DisplayDeck from '@/components/DisplayDeck.vue';
 
 const decoded = jwtDecode(localStorage.getItem('authToken'));
 const userName = ref('');
-const decks = ref([]);
+const userDecks = ref([]);
 
 onMounted(async () => {
   try {
@@ -18,34 +19,34 @@ onMounted(async () => {
     // Users Info
     const userId = decoded.userId;
     const userData = await getUserById(userId);
+   
     userName.value = userData.username;
 
     // Decks Info (Display Deck)
-    decks.value = await getDecksByUserId(userId);
-
-    console.log(decks.value);
+    userDecks.value = await getDecksByUserId(userId);     
 
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'utilisateur:', error);
   }
 });
 
+const addNewDeck = (newDeck) => {
+  userDecks.value.push(newDeck);
+};
 
 </script>
 
 
 
 <template>
+  <main>
     <div class="dashboard">
       <Navbar :name="userName"/>
-      <main>
-        <div class="main-content" v-if="deck.length == 0">
-         <span class="empty-list">La liste de deck est vide...</span>
-        </div>
-       
-      </main>
-     
+      <DisplayDeck :decks="userDecks"/>
+      <CreateDeck :userId="decoded.userId" @deckCreated="addNewDeck"/>
     </div>
+  </main>
+
 </template>
 
 
@@ -66,11 +67,6 @@ onMounted(async () => {
   align-items: center;
 }
 
-
-.empty-list {
-  font-size: clamp(1rem, 5vw, 3rem);
-  opacity: 0.5;
-}
 
 
 .new-deck:hover {
