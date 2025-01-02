@@ -74,7 +74,7 @@ const newDeck = async () => {
 };
 </script>
 
-<style scoped>
+<style>
 /* Overlay */
 .overlay {
     position: fixed;
