@@ -14,7 +14,7 @@
           <p v-else>{{ deck.flashcards.length }} cartes</p>
         </div>
         <div class="options">
-          <div @click="showCards">
+          <div @click="showCards(deck._id)">
             <div class="eye">
               <img
                 src="@/assets/icons/eye.svg"
@@ -49,11 +49,13 @@
   
 <script setup>
 import { ref } from "vue";
-import { deleteDeck } from "../../services/apiService";
+import router from "@/router";
+import { deleteDeck, updateDeck } from "../../services/apiService";
 
 const isModalOpen = ref(false);
 const selectedDeckIndex = ref(null);
 const deckTitle = ref("");
+const deckDescription = ref("");
 
 const user = defineProps({
   decks: Array,
@@ -82,6 +84,10 @@ const confirmDeleteDeck = async () => {
     console.error("Erreur lors de la suppression du deck :", error);
   }
 };
+
+const showCards = (id) => {
+    router.push(`/dashboard/${id}`);
+}
 </script>
 
 

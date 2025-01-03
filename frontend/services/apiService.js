@@ -42,8 +42,8 @@ export const createDeck = async(userId, deckData) => {
     const response = await axios.post(`${BASE_URL}/decks/${userId}`, deckData);
     return response.data; 
 }
-export const updateDeck = async(deckId) => {
-    const response = await axios.patch(`${BASE_URL}/decks/${deckId}`);
+export const updateDeck = async(deckId, deckData) => {
+    const response = await axios.patch(`${BASE_URL}/decks/${deckId}`, deckData);
     return response.data; 
 }
 export const deleteDeck = async(deckId) => {
@@ -52,4 +52,39 @@ export const deleteDeck = async(deckId) => {
 }
 
 // Endpoint Flashcards
+
+export const getAllFlashcards = async() => {
+    const reponse = await axios.get(`${BASE_URL}/flashcards`);
+    return reponse.data;
+}
+
+export const getAllFlashcardsByUserId = async() => {
+    const reponse = await axios.get(`${BASE_URL}/flashcards/${userId}`);
+    return reponse.data;
+}
+
+export const getAllFlashcardsByDeckId = async() => {
+    const reponse = await axios.get(`${BASE_URL}/flashcards/decks/${deckId}`);
+    return reponse.data;
+}
+
+export const getFlashcardById = async() => {
+    const reponse = await axios.get(`${BASE_URL}/flashcards/${deckId}/${flashcardId}`);
+    return reponse.data;
+}
+
+export const createFlashcard = async() => {
+    const reponse = await axios.post(`${BASE_URL}/flashcards/${deckId}`);
+    return reponse.data;
+}
+
+export const modifyFlashcard = async() => {
+    const reponse = await axios.patch(`${BASE_URL}/flashcards/${flashcardId}`);
+    return reponse.data;
+}
+
+export const deleteFlashcard = async() => {
+    const reponse = await axios.delete(`${BASE_URL}/flashcards/${flashcardId}`);
+    return reponse.data;
+}
 
