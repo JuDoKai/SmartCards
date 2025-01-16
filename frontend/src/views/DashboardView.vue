@@ -1,6 +1,5 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue';
-import Filter from '@/components/Filter.vue';
 import CreateDeck from '@/components/CreateDeck.vue';
 import { ref, onMounted } from 'vue';
 
@@ -42,8 +41,13 @@ const addNewDeck = (newDeck) => {
   <main>
     <div class="dashboard">
       <Navbar :name="userName"/>
-      <DisplayDeck :decks="userDecks"/>
-      <CreateDeck :userId="decoded.userId" @deckCreated="addNewDeck"/>
+      <div class="display-deck">
+        <DisplayDeck :decks="userDecks"/>
+        <CreateDeck 
+        :userId="decoded.userId" 
+        @deckCreated="addNewDeck" />
+      </div>
+      
     </div>
   </main>
 
@@ -52,27 +56,21 @@ const addNewDeck = (newDeck) => {
 
 <style scoped>
 
-.dashboard {
+main {
+  height: 100%;
   margin: 0;
   padding: 0;
-  height: 100vh;
 }
 
-
-
-.main-content {
-  height: 70vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.dashboard {
+  width: 100%;
+  overflow: hidden;
 }
 
-
-
-.new-deck:hover {
-  background-color: #464646;
+.display-deck {
+  background-color: blue;
+  margin: 0 1rem 0 1rem;
 }
-
 
 
 </style>

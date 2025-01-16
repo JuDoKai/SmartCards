@@ -6,10 +6,12 @@
                 <div class="form-slot">
                     <label for="textOrEmail">Nom d'utilisateur Ou Email</label>
                     <input type="text" v-model="textOrEmail" required />
+                    <div class="errorFeedback">{{ feedback }} </div>
                 </div>
                 <div class="form-slot">
                     <label for="password">Mot de passe</label>
                     <input type="password" v-model="password" required />
+                    <div class="errorFeedback">{{ feedbackPassword }} </div>
                 </div>
                 <span class="forgot-password">Mot de passe oublié ?</span>
                 <div class="signs">
@@ -52,6 +54,8 @@
 
 <script setup>
 import router from '@/router';
+import '@/assets/main.css';
+
 import { login as loginService, register as registerService } from '../../services/authService'; 
 import { ref } from 'vue';
 
@@ -62,6 +66,7 @@ const email = ref('');
 const password = ref('');
 const confirmedPassword = ref('');
 const errorMessage = ref('');
+const feedback = ref('');
 
 const toggleMode = () => {
     isLoginMode.value = !isLoginMode.value;
@@ -69,6 +74,7 @@ const toggleMode = () => {
     email.value = '';
     password.value = '';
     confirmedPassword.value = '';
+    feedback.value = '';
 
 };
 
@@ -82,6 +88,7 @@ const loginHandler = async () => {
         router.push('/dashboard');
 
     } catch (error) {
+        feedback.value = 'Erreur lors de la connexion. Vérifiez vos identifiants.'
         errorMessage.value = 'Erreur lors de la connexion. Vérifiez vos identifiants.';
         console.error(error);
     }
@@ -129,9 +136,11 @@ const demoAccess = async () => {
 <style scoped>
 
 .container{
-    height: 50%;
-    width: 50%;
+    max-width: 50rem;
+    width: 80%;
+    margin-bottom: 1rem;
 }
+
 .login {
     height: 100%;
     width: 100%;
@@ -152,6 +161,7 @@ form {
     flex-direction: column;
     gap: 1.5rem;
     border: 2px solid #d9d9d9;
+    background-color: #fefcfb;
     border-radius: 5px;
 }
 
@@ -189,15 +199,21 @@ form {
 .button {
     display: flex;
     justify-content: center;
-    color: #f5f5f5;
-    background-color: #2c2c2c;
+    color: #fefcfb;
+    background-color: #cf7600;
     border-radius: 0.75rem;
     padding: 1rem 2rem;
     white-space: nowrap;
     cursor: pointer;
+    font-weight: 700;
 }
 
 .button:hover {
-    background-color: #464646;
+    background-color: #b96500;
+}
+
+.errorFeedback {
+    color: red;
+
 }
 </style>

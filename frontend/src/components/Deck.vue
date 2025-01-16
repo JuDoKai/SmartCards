@@ -1,26 +1,27 @@
 <template>
-    <div class="deck-display">
-        <p>Deck</p>
+   <div class="flip-card">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+            <h3>Question</h3>
+            <hr>
+            {{ Flashcard }}
+            </div>
+            <div class="flip-card-back">
+            <h3>Réponse</h3>
+            <hr>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.deck-display {
-    height: 100px;
-    width: 100px;
-    background-color: red;
-}
+
+
+
 </style>
 
 <script setup>
 import { ref } from 'vue';
-
-const deck = () => ({
-    id: Date.now(),
-    title: '',
-    subtitle: ''
-})
-
-const deckStorage = () => {[]}
+import Flashcard from './Flashcard.vue';
 
 </script>

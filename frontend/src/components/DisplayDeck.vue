@@ -25,6 +25,15 @@
               />
             </div>
           </div>
+          <div @click="openDeleteDeckModal(index)" class="pen">
+            <img
+              src="@/assets/icons/pen.svg"
+              title="Modifier le deck"
+              alt="Modifier le Deck"
+              width="40"
+              height="40"
+            />
+          </div>
           <div @click="openDeleteDeckModal(index)" class="trash">
             <img
               src="@/assets/icons/trash.svg"
@@ -34,6 +43,7 @@
               height="40"
             />
           </div>
+         
         </div>
       </div>
     </div>
@@ -93,6 +103,10 @@ const showCards = (id) => {
 
 <style scoped>
 
+h1 {
+  margin-left: 1rem;
+}
+
 .empty-list {
     font-size: clamp(1rem, 5vw, 3rem);
     opacity: 0.5;
@@ -126,7 +140,8 @@ const showCards = (id) => {
     margin-top: 1rem;
 }
 .eye,
-.trash {
+.trash,
+.pen {
     cursor: pointer;
 }
 

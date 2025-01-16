@@ -1,35 +1,83 @@
-@import './base.css';
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--orange-2);
+  font-family: "Inter";
+  box-sizing: border-box;
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+
+:root,
+.light,
+.light-theme {
+  --orange-1: #fefcfb;
+  --orange-2: #fff7ef;
+  --orange-3: #ffeddb;
+  --orange-4: #ffddb7;
+  --orange-5: #ffd09e;
+  --orange-6: #fcc592;
+  --orange-7: #ebb480;
+  --orange-8: #dd9e60;
+  --orange-9: #db8206;
+  --orange-10: #cf7600;
+  --orange-11: #b96500;
+  --orange-12: #4f341a;
+
+  --orange-a1: #c0400004;
+  --orange-a2: #ff800010;
+  --orange-a3: #ff800024;
+  --orange-a4: #ff870048;
+  --orange-a5: #ff840061;
+  --orange-a6: #f878006d;
+  --orange-a7: #d769007f;
+  --orange-a8: #c964009f;
+  --orange-a9: #da7f00f9;
+  --orange-a10: #cf7600;
+  --orange-a11: #b96500;
+  --orange-a12: #3b1d00e5;
+
+  --orange-contrast: #fff;
+  --orange-surface: #fff5ebcc;
+  --orange-indicator: #db8206;
+  --orange-track: #db8206;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
+@supports (color: color(display-p3 1 1 1)) {
+  @media (color-gamut: p3) {
+    :root, .light, .light-theme {
+      --orange-1: oklch(99.2% 0.0021 63.85);
+      --orange-2: oklch(97.9% 0.0132 63.85);
+      --orange-3: oklch(95.9% 0.0328 63.85);
+      --orange-4: oklch(92.3% 0.0684 63.85);
+      --orange-5: oklch(89.3% 0.0894 63.85);
+      --orange-6: oklch(86% 0.0911 63.85);
+      --orange-7: oklch(80.7% 0.0931 63.85);
+      --orange-8: oklch(74.7% 0.1095 63.85);
+      --orange-9: oklch(68.7% 0.1544 63.85);
+      --orange-10: oklch(64.9% 0.1561 63.85);
+      --orange-11: oklch(59% 0.1499 63.85);
+      --orange-12: oklch(35% 0.0551 63.85);
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+      --orange-a1: color(display-p3 0.7569 0.2667 0.0235 / 0.016);
+      --orange-a2: color(display-p3 0.9373 0.4706 0.0039 / 0.059);
+      --orange-a3: color(display-p3 0.9137 0.5059 0.0078 / 0.134);
+      --orange-a4: color(display-p3 0.9137 0.5098 0.0039 / 0.263);
+      --orange-a5: color(display-p3 0.9255 0.502 0.0039 / 0.353);
+      --orange-a6: color(display-p3 0.8824 0.451 0 / 0.4);
+      --orange-a7: color(display-p3 0.7608 0.3922 0.0039 / 0.471);
+      --orange-a8: color(display-p3 0.7137 0.3686 0 / 0.585);
+      --orange-a9: color(display-p3 0.7686 0.4157 0 / 0.812);
+      --orange-a10: color(display-p3 0.7176 0.3725 0 / 0.832);
+      --orange-a11: color(display-p3 0.6314 0.3137 0 / 0.859);
+      --orange-a12: color(display-p3 0.2 0.102 0 / 0.883);
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+      --orange-contrast: #fff;
+      --orange-surface: color(display-p3 0.9922 0.9608 0.9255 / 0.8);
+      --orange-indicator: oklch(68.7% 0.1544 63.85);
+      --orange-track: oklch(68.7% 0.1544 63.85);
+    }
   }
 }

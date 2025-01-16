@@ -63,7 +63,7 @@ export const getAllFlashcardsByUserId = async() => {
     return reponse.data;
 }
 
-export const getAllFlashcardsByDeckId = async() => {
+export const getAllFlashcardsByDeckId = async(deckId) => {
     const reponse = await axios.get(`${BASE_URL}/flashcards/decks/${deckId}`);
     return reponse.data;
 }

@@ -2,6 +2,7 @@
     <div class="container">
         <div class="title">
             <h1>SmartCards</h1>
+            <h2>Le savoir en cartes</h2>
         </div>
         <Auth></Auth>
     </div>
@@ -10,6 +11,7 @@
 
 <script setup>
 import Auth from '@/components/Auth.vue';
+ 
 </script>
 
 <style scoped>
@@ -18,22 +20,30 @@ import Auth from '@/components/Auth.vue';
     display: flex;
     flex-direction: column;
     align-items: center;
-
 }
+
 .title {
     display: flex;
     flex-direction: column;
     align-items: center;
-    line-height: 0;
-    font-family: Georgia serif;
-}
- 
-.title h1 {
+    line-height: 2rem;
     font-family: Georgia serif;
     font-style: italic;
     font-weight: 100;
+    position: relative;
+}
+ 
+.title h1 {
+    font-weight: 100;
     font-size: clamp(3rem, 7vw, 5rem);
 
+}
+
+.title h2 {
+    font-weight: 100;
+    font-size: clamp(1rem, 3.5vw, 2rem);
+    position: absolute;
+    top: calc(40px + 3vw);
 }
 
 .title p {
@@ -41,10 +51,6 @@ import Auth from '@/components/Auth.vue';
     font-style: italic;
     font-weight: 100;
     font-size: 2rem;
-}
-
-.login {
-    width: 50%;
 }
 
 
