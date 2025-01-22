@@ -62,13 +62,6 @@
             </div>
           
         </div>
-
-        <!--  
-        <div class="log">
-            <p> {{ user.name }}</p>
-            <button @click="logout" class="logout">Se Déconnecter</button>
-        </div>
-         -->
     </nav>
 </template>
 
@@ -90,14 +83,10 @@ const isSmallScreen = ref(false);
 const isMenuOpen = ref(false);
 
 const checkScreenSize = () => {
-    isSmallScreen.value = window.innerWidth < 540;
-    if ((window.innerWidth == 540 && isMenuOpen.value == true)   ){
+    isSmallScreen.value = window.innerWidth < 580;
+    if ((window.innerWidth == 580 && isMenuOpen.value == true)   ){
         isMenuOpen.value = !isMenuOpen.value;
     }
-};
-
-const closeMenu = () => {
-    isSmallScreen.value = window.innerWidth < 540;
 };
 
 onMounted(() => {
@@ -173,10 +162,10 @@ const openMenu = () => {
     display: flex;
     align-items: center;
     background-color: #db8206;
-    border: 3px solid black;
     list-style: none;
     gap: 10px;
     font-size: 1.25rem;
+    padding: 0 1rem 0 0.5rem;
 
 }
 
@@ -189,15 +178,10 @@ const openMenu = () => {
     gap: 10px;
 }
 
-.small-menu-open {
-    border: 2px solid red;
-}
-
 .menu img {
     height: 50px;
-    border: 5px solid black;
     position: absolute;
-    top: 10px;
+    top: 15px;
     right: 0;
 }
 
@@ -209,16 +193,22 @@ const openMenu = () => {
     display: flex;
     flex-direction: row;
     gap: 20px;  
+    height: 100%;
 }
 
 .big-menu ul li {
-    border: 3px solid black;
+    cursor: pointer;
     list-style: none;
     display: flex;
     align-items: center;
     gap: 5px;
-    height: 100%;
+    height: 6.8vh;
+    padding: 1rem;
     font-size: clamp(1rem, 5vw, 1.5rem);
+}
+
+.big-menu ul :hover {
+    background-color: #b96500;
 }
 
 
