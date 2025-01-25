@@ -47,7 +47,6 @@ const addNewDeck = (newDeck) => {
         :userId="decoded.userId" 
         @deckCreated="addNewDeck" />
       </div>
-      
     </div>
   </main>
 
@@ -64,11 +63,9 @@ main {
 
 .dashboard {
   width: 100%;
-  overflow: hidden;
 }
 
 .display-deck {
-  background-color: blue;
   margin: 0 1rem 0 1rem;
 }
 

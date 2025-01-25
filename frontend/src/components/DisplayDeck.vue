@@ -25,7 +25,7 @@
               />
             </div>
           </div>
-          <div @click="openDeleteDeckModal(index)" class="pen">
+          <div @click="openModifyDeckModal(index)" class="pen">
             <img
               src="@/assets/icons/pen.svg"
               title="Modifier le deck"
@@ -48,24 +48,47 @@
       </div>
     </div>
   
-    <div v-if="isModalOpen" class="overlay">
+    <div v-if="isModalOpenTrash" class="overlay">
       <div class="modal">
         <p>Voulez-vous supprimer définitivement le deck <strong>{{ deckTitle }}</strong> ?</p>
         <button type="button" @click="confirmDeleteDeck">Valider</button>
         <button type="button" @click="closeModal">Annuler</button>
       </div>
     </div>
+
+    <div v-if="isModalOpenPen" class="overlay">
+      <div class="modal">
+        <p>Modifier Deck</p>
+
+        <form @submit.prevent="newDeck">
+          <div class="form-slot">
+            <label for="title">Titre du Deck </label>
+            <input type="text" v-model.trim="deckTitle" required />
+          </div>
+          <div class="form-slot">
+            <label for="description">Description (recommandé) </label>
+            <input type="text" v-model.trim="deckDescription" />
+          </div>
+          <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+          <button type="submit" :disabled="deckTitle.trim().length === 0" @click="confirmModifyDeck">Valider</button>
+          <button type="button" @click="closeModal">Annuler</button>
+        </form>
+      </div>
+    </div>
 </template>
   
 <script setup>
+
 import { ref } from "vue";
 import router from "@/router";
 import { deleteDeck, updateDeck } from "../../services/apiService";
 
-const isModalOpen = ref(false);
+const isModalOpenTrash = ref(false);
+const isModalOpenPen = ref(false);
 const selectedDeckIndex = ref(null);
 const deckTitle = ref("");
 const deckDescription = ref("");
+const errorMessage = ref("");
 
 const user = defineProps({
   decks: Array,
@@ -74,14 +97,26 @@ const user = defineProps({
 const openDeleteDeckModal = (index) => {
   selectedDeckIndex.value = index;
   deckTitle.value = user.decks[index].title;
-  isModalOpen.value = true;
+  isModalOpenTrash.value = true;
 };
 
 const closeModal = () => {
-  isModalOpen.value = false;
+  isModalOpenTrash.value = false;
+  isModalOpenPen.value = false;
+
   selectedDeckIndex.value = null;
   deckTitle.value = "";
+  deckDescription.value = "";
+  errorMessage.value = ""; 
 };
+
+
+const openModifyDeckModal = (index) => {
+  selectedDeckIndex.value = index;
+  deckTitle.value = user.decks[index].title;
+  deckDescription.value = user.decks[index].description;
+  isModalOpenPen.value = true;
+}
 
 const confirmDeleteDeck = async () => {
   const deckId = user.decks[selectedDeckIndex.value]._id;
@@ -94,6 +129,31 @@ const confirmDeleteDeck = async () => {
     console.error("Erreur lors de la suppression du deck :", error);
   }
 };
+
+const confirmModifyDeck = async () => {
+  const deckId = user.decks[selectedDeckIndex.value]._id;
+  const deckData = {
+    title: deckTitle.value.trim(), 
+    description: deckDescription.value.trim(),
+  };
+
+  // Validation du titre
+  if (deckData.title.length === 0) {
+    errorMessage.value = "Le titre du deck ne doit pas être vide.";
+    return; 
+  }
+
+  try {
+    await updateDeck(deckId, deckData); // Appel API pour mettre à jour le deck
+    user.decks[selectedDeckIndex.value].title = deckData.title; // Mise à jour locale
+    user.decks[selectedDeckIndex.value].description = deckData.description;
+    closeModal(); // Ferme la modal uniquement en cas de succès
+  } catch (error) {
+    console.error("Erreur lors de la modification du deck :", error);
+    errorMessage.value = "Une erreur est survenue lors de la modification.";
+  }
+};
+
 
 const showCards = (id) => {
     router.push(`/dashboard/${id}`);
@@ -113,17 +173,22 @@ h1 {
 }
 
 .deck-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-gap: 20px;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow: hidden;
 }
+
+
 .deck-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
     padding: 1rem;
-    white-space: nowrap;
     border: 4px solid black;
     border-radius: 8px;
     background-color: rgb(255, 244, 224);

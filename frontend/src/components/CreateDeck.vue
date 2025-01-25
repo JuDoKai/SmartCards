@@ -7,11 +7,11 @@
         <form @submit.prevent="newDeck">
           <div class="form-slot">
             <label for="title">Titre du nouveau Deck</label>
-            <input type="text" v-model="title" required />
+            <input type="text" v-model.trim="title" required />
           </div>
           <div class="form-slot">
             <label for="description">Description (recommandé)</label>
-            <input type="text" v-model="description" />
+            <input type="text" v-model.trim="description" />
           </div>
           <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           <button type="submit">Valider</button>
