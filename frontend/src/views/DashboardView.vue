@@ -1,6 +1,7 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue';
 import CreateDeck from '@/components/CreateDeck.vue';
+import GenerateDeck from '@/components/GenerateDeck.vue';
 import { ref, onMounted } from 'vue';
 
 import { jwtDecode } from 'jwt-decode';
@@ -46,6 +47,7 @@ const addNewDeck = (newDeck) => {
         <CreateDeck 
         :userId="decoded.userId" 
         @deckCreated="addNewDeck" />
+        
       </div>
     </div>
   </main>

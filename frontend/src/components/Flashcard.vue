@@ -20,7 +20,7 @@
 hr {
     margin: 1rem  1rem;
 }
-
+/*  
 .flip-card {
     background-color: transparent;
     width: 50rem;
@@ -44,7 +44,7 @@ hr {
 .flip-card:hover .flip-card-inner {
     transform: rotateY(180deg);
 }
-*/
+
 
 .flip-card-front, 
 .flip-card-back {
@@ -66,6 +66,7 @@ hr {
     transform: rotateY(180deg);
 }
 
+*/
 
 </style>
  

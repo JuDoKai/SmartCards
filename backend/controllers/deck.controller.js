@@ -1,5 +1,6 @@
 const Deck = require('../models/deck.model');
 const User = require('../models/user.model');
+const Flashcard = require('../models/flashcard.model');
 
 module.exports.getAllDecks = async (req, res) => {
     try {
@@ -114,21 +115,27 @@ module.exports.updateDeck = async (req, res) => {
     }
   };
   
-  module.exports.deleteDeck = async (req, res) => {
-    try {
+module.exports.deleteDeck = async (req, res) => {
+  try {
       const { id } = req.params;
+
+      // Trouver le deck à supprimer
       const deletedDeck = await Deck.findById(id);
-  
       if (!deletedDeck) {
-        return res.status(404).json({ message: 'Deck non trouvé.' });
+          return res.status(404).json({ message: 'Deck non trouvé.' });
       }
 
+      // Supprimer toutes les flashcards associées au deck
+      await Flashcard.deleteMany({ deck: id });
+
+      // Supprimer le deck
       await deletedDeck.deleteOne();
-      res.status(200).json({ message: 'Deck supprimé avec succès.' });
-    } catch (error) {
-      res.status(400).json({ 
-        message: 'Erreur lors de la suppression du deck.',
-        error: error.message 
+
+      res.status(200).json({ message: 'Deck et ses flashcards supprimés avec succès.' });
+  } catch (error) {
+      res.status(400).json({
+          message: 'Erreur lors de la suppression du deck.',
+          error: error.message,
       });
-    }
-  };
+  }
+};

@@ -137,17 +137,11 @@ const confirmModifyDeck = async () => {
     description: deckDescription.value.trim(),
   };
 
-  // Validation du titre
-  if (deckData.title.length === 0) {
-    errorMessage.value = "Le titre du deck ne doit pas être vide.";
-    return; 
-  }
-
   try {
-    await updateDeck(deckId, deckData); // Appel API pour mettre à jour le deck
-    user.decks[selectedDeckIndex.value].title = deckData.title; // Mise à jour locale
+    await updateDeck(deckId, deckData);
+    user.decks[selectedDeckIndex.value].title = deckData.title; 
     user.decks[selectedDeckIndex.value].description = deckData.description;
-    closeModal(); // Ferme la modal uniquement en cas de succès
+    closeModal(); 
   } catch (error) {
     console.error("Erreur lors de la modification du deck :", error);
     errorMessage.value = "Une erreur est survenue lors de la modification.";

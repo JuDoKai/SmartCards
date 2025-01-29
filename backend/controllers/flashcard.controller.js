@@ -2,6 +2,7 @@ const FlashcardModel = require('../models/flashcard.model');
 const DeckModel = require('../models/deck.model');
 const UserModel = require('../models/user.model');
 
+
 module.exports.getAllFlashcards = async (req, res) => {
     try {
         const flashcards = await FlashcardModel.find();
@@ -96,6 +97,83 @@ module.exports.createFlashcard = async (req, res) => {
         });
     }
 };
+
+const { OpenAI } = require("openai"); 
+
+const openaiClient = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+module.exports.generateFlashcards = async (req, res) => {
+    try {
+        const { deckId } = req.params;
+        let { number, level } = req.body;
+
+        number = parseInt(number);
+        if (!number || number <= 0) {
+            return res.status(400).json({ message: "Le nombre de flashcards doit être un entier positif." });
+        }
+
+        const levelDescriptions = {
+            Primaire: "questions simples et adaptées aux enfants en école primaire.",
+            Collège: "questions adaptées aux élèves du collège, avec une difficulté modérée.",
+            Lycée: "questions complexes adaptées aux élèves du lycée.",
+            Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires.",
+        };
+
+        if (!levelDescriptions[level]) {
+            return res.status(400).json({ message: "Niveau scolaire invalide." });
+        }
+
+        const deck = await DeckModel.findById(deckId);
+        if (!deck) {
+            return res.status(404).json({ message: "Deck non trouvé." });
+        }
+
+        const prompt = `Génère exactement ${number} flashcards sur ${deck.title} : ${deck.description}.
+            Niveau : ${levelDescriptions[level]}.
+            Réponse courtes (Max 20 mots).
+            Format JSON : [{"question": "?", "answer": "?"}]`;
+
+        // Appel correct à OpenAI
+        const aiResponse = await openaiClient.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 100,
+            temperature: 0.4
+        });
+
+        const rawText = aiResponse.choices[0]?.message?.content?.trim();
+        let generatedFlashcards;
+
+        try {
+            generatedFlashcards = JSON.parse(rawText);
+            if (!Array.isArray(generatedFlashcards)) {
+                throw new Error("Format JSON invalide.");
+            }
+        } catch (error) {
+            return res.status(500).json({ message: "Erreur de format JSON.", rawText });
+        }
+
+        const bulkOps = generatedFlashcards.map(flashcard => ({
+            insertOne: { document: { question: flashcard.question, answer: flashcard.answer, deck: deckId } }
+        }));
+
+        const result = await FlashcardModel.bulkWrite(bulkOps);
+
+        // 🔹 Récupérer les flashcards créées avec leurs questions et réponses
+        const createdFlashcards = await FlashcardModel.find({ '_id': { $in: Object.values(result.insertedIds) } });
+
+        res.status(201).json({
+            message: "Flashcards générées avec succès.",
+            flashcards: createdFlashcards,  // Retourner les flashcards avec leur contenu
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la génération des flashcards.", error: error.message });
+    }
+};
+
+
 
 module.exports.modifyFlashcard = async (req, res) => {
     try {
