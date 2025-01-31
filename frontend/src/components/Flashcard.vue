@@ -9,7 +9,7 @@
             <div class="flip-card-back">
              <h3>Réponse</h3>
              <hr>
-             {{ flashcard.reponse }}
+             {{ flashcard.answer }}
             </div>
         </div>
     </div>
@@ -75,7 +75,7 @@ import { ref } from 'vue';
 
 const flashcard = defineProps({
     question: String,
-    reponse: String
+    answer: String
 });
  
 </script>

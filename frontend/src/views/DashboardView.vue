@@ -1,7 +1,6 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue';
 import CreateDeck from '@/components/CreateDeck.vue';
-import GenerateDeck from '@/components/GenerateDeck.vue';
 import { ref, onMounted } from 'vue';
 
 import { jwtDecode } from 'jwt-decode';
@@ -30,8 +29,14 @@ onMounted(async () => {
   }
 });
 
-const addNewDeck = (newDeck) => {
-  userDecks.value.push(newDeck);
+const addNewDeck = async () => {
+  try {
+    // Recharge tous les decks depuis l'API
+    userDecks.value = await getDecksByUserId(decoded.userId);
+    console.log("🔄 Decks mis à jour depuis l'API !");
+  } catch (error) {
+    console.error("❌ Erreur lors du rechargement des decks :", error);
+  }
 };
 
 </script>
@@ -45,9 +50,8 @@ const addNewDeck = (newDeck) => {
       <div class="display-deck">
         <DisplayDeck :decks="userDecks"/>
         <CreateDeck 
-        :userId="decoded.userId" 
-        @deckCreated="addNewDeck" />
-        
+         :userId="decoded.userId" 
+         @deckCreated="addNewDeck" />
       </div>
     </div>
   </main>

@@ -9,6 +9,8 @@
             <div class="flip-card-back">
             <h3>Réponse</h3>
             <hr>
+            {{ Flashcard }}
+
             </div>
         </div>
     </div>

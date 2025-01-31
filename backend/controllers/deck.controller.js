@@ -2,6 +2,38 @@ const Deck = require('../models/deck.model');
 const User = require('../models/user.model');
 const Flashcard = require('../models/flashcard.model');
 
+const { OpenAI } = require("openai"); 
+
+const openaiClient = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
+
+
+const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber, batchSize = 3) => {
+  const batchPromises = [];
+  for (let i = 0; i < totalNumber; i += batchSize) {
+      const prompt = `Génère exactement ${Math.min(batchSize, totalNumber - i)} flashcards sur le sujet : ${topic}.
+      Niveau : ${levelDescription}.
+      Questions et réponses courtes et précises (moins de 10 mots chacune).
+      Réponds uniquement avec un JSON :
+      [{"question": "Question ici", "answer": "Réponse ici"}]`;
+
+      batchPromises.push(
+          openaiClient.chat.completions.create({
+              model: "gpt-3.5-turbo",
+              messages: [
+                  { role: "system", content: "Tu es un assistant qui génère des flashcards." },
+                  { role: "user", content: prompt }
+              ],
+              max_tokens: 150,
+              temperature: 0.5
+          })
+      );
+  }
+
+  return await Promise.all(batchPromises);
+};
+
 module.exports.getAllDecks = async (req, res) => {
     try {
       const decks = await Deck.find()
@@ -55,14 +87,14 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
 };
 
 
+// 🚀 **Nouvelle fonction `createDeck` qui génère aussi des flashcards automatiquement**
 module.exports.createDeck = async (req, res) => {
-    try {
-        const { title, description } = req.body;
-        const { userId } = req.params;
-  
+  try {
+      const { title, description, number, level } = req.body;
+      const { userId } = req.params;
 
       if (!title) {
-        return res.status(400).json({ message: "Le titre est requis." });
+          return res.status(400).json({ message: "Le titre est requis." });
       }
 
       const user = await User.findById(userId);
@@ -70,26 +102,85 @@ module.exports.createDeck = async (req, res) => {
           return res.status(404).json({ message: "Utilisateur non trouvé." });
       }
 
-        const newDeck = new Deck({
-            title,
-            description,
-            user: userId,
-          });
+      // **1️⃣ Création d'un deck vide**
+      const newDeck = new Deck({
+          title,
+          description,
+          user: userId,
+      });
 
-        const savedDeck = await newDeck.save();
+      const savedDeck = await newDeck.save();
 
-        await User.findByIdAndUpdate(userId, {
+      await User.findByIdAndUpdate(userId, {
           $push: { decks: savedDeck._id },
-        });
+      });
 
-        res.status(200).json(savedDeck);   
-    } catch (error) {
-        res.status(500).json({ 
-          message: 'Erreur lors de la création du deck.', 
-          error: error.message 
-        });
-    }
-}
+      // **2️⃣ Vérification des paramètres pour générer des flashcards**
+      if (!number || number <= 0) {
+          return res.status(200).json(savedDeck);
+      }
+
+      const levelDescriptions = {
+          Primaire: "questions simples et adaptées aux enfants en école primaire.",
+          Collège: "questions adaptées aux élèves du collège, avec une difficulté modérée.",
+          Lycée: "questions complexes adaptées aux élèves du lycée.",
+          Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires.",
+      };
+
+      if (!levelDescriptions[level]) {
+          return res.status(400).json({ message: "Niveau scolaire invalide." });
+      }
+
+      // **3️⃣ Génération des flashcards avec OpenAI**
+      const topic = `${title}: ${description}`;
+      const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
+
+      let generatedFlashcards = [];
+      for (const response of aiResponses) {
+          try {
+              const rawText = response.choices[0]?.message?.content?.trim();
+              const parsedFlashcards = JSON.parse(rawText);
+              if (Array.isArray(parsedFlashcards)) {
+                  generatedFlashcards = [...generatedFlashcards, ...parsedFlashcards];
+              }
+          } catch (error) {
+              console.error("Erreur de parsing JSON:", error);
+          }
+      }
+
+      if (generatedFlashcards.length === 0) {
+          return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
+      }
+
+      // **4️⃣ Sauvegarde des flashcards dans MongoDB**
+      const flashcardsToInsert = generatedFlashcards.map(flashcard => ({
+          question: flashcard.question,
+          answer: flashcard.answer,
+          deck: savedDeck._id,
+      }));
+
+      const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
+
+      // **5️⃣ Mise à jour du deck avec les flashcards**
+      await Deck.findByIdAndUpdate(savedDeck._id, {
+          $push: { flashcards: { $each: insertedFlashcards.map(fc => fc._id) } }
+      });
+
+      // **6️⃣ Retour de la réponse finale avec les flashcards**
+      res.status(201).json({
+          message: "Deck créé avec succès et flashcards générées.",
+          deck: savedDeck,
+          flashcards: insertedFlashcards,
+      });
+
+  } catch (error) {
+      res.status(500).json({
+          message: 'Erreur lors de la création du deck et de la génération des flashcards.',
+          error: error.message
+      });
+  }
+};
+
 
 
 module.exports.updateDeck = async (req, res) => {

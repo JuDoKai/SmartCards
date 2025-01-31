@@ -14,7 +14,7 @@
         v-for="flashcard in flashcards"
         :key="flashcard._id"
       >
-      <Flashcard :question="flashcard.question" :reponse="flashcard.reponse" /> 
+      <Flashcard :question="flashcard.question" :answer="flashcard.answer" /> 
      </div>
     </div>
   </div>

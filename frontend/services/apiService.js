@@ -18,6 +18,7 @@ export const createUser = async(userId) => {
     const response = await axios.post(`${BASE_URL}/users`);
     return response.data; 
 };
+
 export const updateUser = async(userId) => {
     const response = await axios.patch(`${BASE_URL}/users/${userId}`);
     return response.data; 
@@ -40,8 +41,10 @@ export const getDecksByUserId = async(userId) => {
 }
 export const createDeck = async(userId, deckData) => {
     const response = await axios.post(`${BASE_URL}/decks/${userId}`, deckData);
+    console.log("Réponse API :", response.data); // Vérifier ce que l'API retourne
     return response.data; 
 }
+
 export const updateDeck = async(deckId, deckData) => {
     const response = await axios.patch(`${BASE_URL}/decks/${deckId}`, deckData);
     return response.data; 
@@ -77,6 +80,19 @@ export const createFlashcard = async() => {
     const reponse = await axios.post(`${BASE_URL}/flashcards/${deckId}`);
     return reponse.data;
 }
+
+export const generateFlashcard = async (userId, flashcardsData) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/flashcards/${flashcardsData.deckId}/generate`, {
+            number: flashcardsData.number,
+            level: flashcardsData.level
+        });
+        return response.data; // Retourne les flashcards générées
+    } catch (error) {
+        console.error('Erreur lors de la génération des flashcards:', error);
+        throw error;
+    }
+};
 
 export const modifyFlashcard = async() => {
     const reponse = await axios.patch(`${BASE_URL}/flashcards/${flashcardId}`);

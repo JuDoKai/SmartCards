@@ -1,6 +1,11 @@
 const FlashcardModel = require('../models/flashcard.model');
 const DeckModel = require('../models/deck.model');
 const UserModel = require('../models/user.model');
+const { OpenAI } = require("openai"); 
+
+const openaiClient = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+});
 
 
 module.exports.getAllFlashcards = async (req, res) => {
@@ -54,6 +59,7 @@ module.exports.getFlashcardById = async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de la récupération de la flashcard.', error: error.message });
     }
 }
+
 module.exports.createFlashcard = async (req, res) => {
     try {
         const { question, answer } = req.body;
@@ -98,11 +104,32 @@ module.exports.createFlashcard = async (req, res) => {
     }
 };
 
-const { OpenAI } = require("openai"); 
 
-const openaiClient = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+
+const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber, batchSize = 3) => {
+    const batchPromises = [];
+    for (let i = 0; i < totalNumber; i += batchSize) {
+        const prompt = `Génère exactement ${Math.min(batchSize, totalNumber - i)} flashcards sur le sujet : ${topic}.
+        Niveau : ${levelDescription}.
+        Questions et réponses courtes et précises (moins de 10 mots chacune).
+        Réponds uniquement avec un JSON :
+        [{"question": "Question ici", "answer": "Réponse ici"}]`;
+
+        batchPromises.push(
+            openaiClient.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [
+                    { role: "system", content: "Tu es un assistant qui génère des flashcards." },
+                    { role: "user", content: prompt }
+                ],
+                max_tokens: 150,
+                temperature: 0.5
+            })
+        );
+    }
+
+    return await Promise.all(batchPromises);
+};
 
 module.exports.generateFlashcards = async (req, res) => {
     try {
@@ -130,49 +157,58 @@ module.exports.generateFlashcards = async (req, res) => {
             return res.status(404).json({ message: "Deck non trouvé." });
         }
 
-        const prompt = `Génère exactement ${number} flashcards sur ${deck.title} : ${deck.description}.
-            Niveau : ${levelDescriptions[level]}.
-            Réponse courtes (Max 20 mots).
-            Format JSON : [{"question": "?", "answer": "?"}]`;
+        const topic = `${deck.title}: ${deck.description}`;
+        const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
 
-        // Appel correct à OpenAI
-        const aiResponse = await openaiClient.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 100,
-            temperature: 0.4
-        });
-
-        const rawText = aiResponse.choices[0]?.message?.content?.trim();
-        let generatedFlashcards;
-
-        try {
-            generatedFlashcards = JSON.parse(rawText);
-            if (!Array.isArray(generatedFlashcards)) {
-                throw new Error("Format JSON invalide.");
+        // 🔹 Extraction et parsing des résultats OpenAI
+        let generatedFlashcards = [];
+        for (const response of aiResponses) {
+            try {
+                const rawText = response.choices[0]?.message?.content?.trim();
+                const parsedFlashcards = JSON.parse(rawText);
+                if (Array.isArray(parsedFlashcards)) {
+                    generatedFlashcards = [...generatedFlashcards, ...parsedFlashcards];
+                }
+            } catch (error) {
+                console.error("Erreur de parsing JSON:", error);
             }
-        } catch (error) {
-            return res.status(500).json({ message: "Erreur de format JSON.", rawText });
         }
 
+        if (generatedFlashcards.length === 0) {
+            return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
+        }
+
+        // 🔹 Optimisation MongoDB : insertion en masse avec bulkWrite
         const bulkOps = generatedFlashcards.map(flashcard => ({
-            insertOne: { document: { question: flashcard.question, answer: flashcard.answer, deck: deckId } }
+            insertOne: {
+                document: {
+                    question: flashcard.question,
+                    answer: flashcard.answer,
+                    deck: deckId,
+                }
+            }
         }));
 
         const result = await FlashcardModel.bulkWrite(bulkOps);
 
-        // 🔹 Récupérer les flashcards créées avec leurs questions et réponses
-        const createdFlashcards = await FlashcardModel.find({ '_id': { $in: Object.values(result.insertedIds) } });
+        // 🔹 Mise à jour du deck avec les nouvelles flashcards
+        await DeckModel.updateOne(
+            { _id: deckId },
+            { $push: { flashcards: { $each: Object.values(result.insertedIds) } } }
+        );
 
         res.status(201).json({
-            message: "Flashcards générées avec succès.",
-            flashcards: createdFlashcards,  // Retourner les flashcards avec leur contenu
+            message: "Flashcards générées et sauvegardées avec succès.",
+            flashcards: Object.values(result.insertedIds),
         });
+
     } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la génération des flashcards.", error: error.message });
+        res.status(500).json({
+            message: "Erreur lors de la génération des flashcards.",
+            error: error.message,
+        });
     }
 };
-
 
 
 module.exports.modifyFlashcard = async (req, res) => {
