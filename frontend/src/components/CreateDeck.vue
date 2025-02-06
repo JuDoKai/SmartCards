@@ -20,11 +20,11 @@
     <div class="modal">
       <form @submit.prevent="newDeck">
         <div class="form-slot">
-          <label for="title">Titre du nouveau Deck</label>
+          <label for="title">Titre du nouveau Deck </label>
           <input type="text" v-model="title" required />
         </div>
         <div class="form-slot">
-          <label for="description">Description (recommandé)</label>
+          <label for="description">Description (recommandé) </label>
           <input type="text" v-model="description" />
         </div>
 
@@ -41,11 +41,11 @@
     <div class="modal">
       <form @submit.prevent="newDeck">
         <div class="form-slot">
-          <label for="title">Titre du nouveau Deck</label>
+          <label for="title">Titre du nouveau Deck </label>
           <input type="text" v-model="title" required />
         </div>
         <div class="form-slot">
-          <label for="description">Description (recommandé)</label>
+          <label for="description">Description (recommandé) </label>
           <input type="text" v-model="description" />
         </div>
 
@@ -96,20 +96,19 @@ const isAIFormVisible = ref(false);
 const errorMessage = ref('');
 
 
-// Fonction pour afficher le formulaire
 const showForm = (mode) => {
   isFormVisible.value = true;
   isAIFormVisible.value = mode === 'ai';
   errorMessage.value = '';
 };
 
-// Fonction pour fermer le formulaire
 const closeForm = () => {
   isFormVisible.value = false;
   isAIFormVisible.value = false;
   title.value = '';
   description.value = '';
 };
+
 const newDeck = async () => {
   try {
     const deckData = {
@@ -134,7 +133,7 @@ const newDeck = async () => {
 
 </script>
 
-<style>
+<style scooped>
 h1 {
   margin-left: 1rem;
 }

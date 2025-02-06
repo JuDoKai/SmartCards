@@ -151,7 +151,10 @@ const confirmModifyDeck = async () => {
 
 const showCards = (id) => {
     router.push(`/dashboard/${id}`);
+    
 }
+
+
 </script>
 
 

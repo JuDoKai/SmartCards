@@ -1,81 +1,88 @@
 <template>
-    <div class="flip-card">
-         <div class="flip-card-inner">
-            <div class="flip-card-front">
-             <h3>Question</h3>
-             <hr>
-             {{ flashcard.question }}
-             </div>
-            <div class="flip-card-back">
-             <h3>Réponse</h3>
-             <hr>
-             {{ flashcard.answer }}
-            </div>
+    <div class="flip-card" @click="toggleFlip">
+      <div class="flip-card-inner" :class="{ flipped: isFlipped }">
+        <div class="flip-card-front">
+          <h3>Question</h3>
+          {{ question }} 
         </div>
+        <div class="flip-card-back">
+          <h3>Réponse</h3>
+          {{ answer }} 
+        </div>
+      </div>
     </div>
-</template>
- 
-<style scoped>
-
-hr {
-    margin: 1rem  1rem;
-}
-/*  
-.flip-card {
+  </template>
+  
+  <style scoped>
+  hr {
+    margin: 1rem;
+  }
+  
+  .flip-card {
     background-color: transparent;
-    width: 50rem;
-    height: 20rem;
-    border-radius: 20px;
-    
-}
-
-.flip-card-inner {
+    max-width: 1000px;
+    width: 80%;
+    height: 300px;
+    border-radius: 10px;
+    perspective: 1000px;
+  }
+  
+  .flip-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
     text-align: center;
     transition: transform 0.5s;
     transform-style: preserve-3d;
-    border-radius: 200px;
-
-}
-
-/*
-.flip-card:hover .flip-card-inner {
-    transform: rotateY(180deg);
-}
-
-
-.flip-card-front, 
-.flip-card-back {
+    border-radius: 10px;
+  }
+  
+  .flip-card-front,
+  .flip-card-back {
     position: absolute;
     width: 100%;
     height: 100%;
-    -webkit-backface-visibility: hidden; 
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-}
-
-.flip-card-front {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 1rem;
+    box-sizing: border-box;
+    border: 2px solid black;
+    border-radius: 10px;
+  }
+  
+  .flip-card-front {
     background-color: white;
     color: black;
-}
-
-.flip-card-back {
+  }
+  
+  .flip-card-back {
     background-color: var(--orange3);
     color: white;
     transform: rotateY(180deg);
-}
-
-*/
-
-</style>
- 
-<script setup>
-import { ref } from 'vue';
-
-const flashcard = defineProps({
+  }
+  
+  .flip-card-inner.flipped {
+    transform: rotateY(180deg);
+  }
+  </style>
+  
+  <script setup>
+  import { ref } from "vue";
+  
+  const props = defineProps({
     question: String,
-    answer: String
-});
- 
-</script>
+    answer: String,
+  });
+  
+  const isFlipped = ref(false);
+  
+  // Fonction pour alterner l'affichage de la question et de la réponse
+  const toggleFlip = () => {
+    isFlipped.value = !isFlipped.value;
+  };
+  </script>
+  

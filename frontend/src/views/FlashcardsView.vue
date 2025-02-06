@@ -1,41 +1,102 @@
 <template>
-  <Navbar :name="userName" />
-  <div>
-    <h1>Flashcards pour le deck :</h1>
+  <Navbar />
+  <div class="title">
+    <h1>Flashcards du deck</h1>
+    <div class="return" @click="closeDeck">
+      <img
+        src="@/assets/icons/left-return-arrow.svg"
+        title="Retour"
+        alt="Retour"
+        width="40"
+        height="40"
+      />
+    </div>
   </div>
 
   <div class="flashcard-container">
     <div v-if="flashcards.length === 0">
       <span class="empty-list">La liste de flashcards est vide...</span>
     </div>
-    <div class="carousel">
-      <div
-        class="flashcard-item"
+    <Swiper
+      v-else
+      :modules="[Navigation, Pagination]"
+      :navigation="true"
+      :pagination="{ clickable: true }"
+      class="swiper-container"
+    >
+      <SwiperSlide
         v-for="flashcard in flashcards"
         :key="flashcard._id"
+        class="flashcard-slide"
       >
-      <Flashcard :question="flashcard.question" :answer="flashcard.answer" /> 
-     </div>
-    </div>
+        <!-- Vérifie si flashcard.question et flashcard.answer sont définis -->
+        <Flashcard
+          v-if="flashcard.question && flashcard.answer"
+          :question="flashcard.question"
+          :answer="flashcard.answer"
+        />
+      </SwiperSlide>
+    </Swiper>
   </div>
-
 </template>
 
 
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+import Navbar from "@/components/Navbar.vue";
+import Flashcard from "@/components/Flashcard.vue";
+import { getAllFlashcardsByDeckId } from "../../services/apiService";
+
+const props = defineProps(["id"]);
+const flashcards = ref([]);
+const router = useRouter();
+
+onMounted(async () => {
+  try {
+    const data = await getAllFlashcardsByDeckId(props.id);
+    flashcards.value = data;
+  } catch (error) {
+    console.error("Erreur lors du chargement du deck:", error);
+  }
+});
+
+const closeDeck = () => {
+  router.push("/dashboard/");
+};
+</script>
+
 
 <style scoped>
-
 h1 {
   margin-left: 1rem;
 }
 
-.flashcard-container{
- height: 80vh;
- width: auto;
- display: flex;
- justify-content: center;
- align-items: center;
- border: 3px solid black;
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 1rem;
+}
+
+.return {
+  cursor: pointer;
+}
+
+.flashcard-container {
+  height: 80vh;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid black;
+  padding: 1rem;
 }
 
 .empty-list {
@@ -43,40 +104,14 @@ h1 {
   opacity: 0.5;
 }
 
-.carousel {
-  display: flex;
-  gap: 2rem;
+.swiper-container {
+  width: 100%;
+  height: 500px;
 }
 
-
+.flashcard-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
-
-
-<script setup>
-import $ from 'jquery';
-import 'slick-carousel';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-
-import Navbar from '@/components/Navbar.vue';
-import Flashcard from '@/components/Flashcard.vue';
-import { onMounted, ref, nextTick } from 'vue';
-import { getAllFlashcardsByDeckId } from '../../services/apiService';
-
-const props = defineProps(['id']); // ID du deck passé via la route
-const flashcards = ref([]); // Liste des flashcards
-
-onMounted(async () => {
-  try {
-    // Récupération des flashcards
-    const data = await getAllFlashcardsByDeckId(props.id);
-    flashcards.value = data;
-
-    // Attendre que le DOM soit mis à jour
-    await nextTick();
-
-  } catch (error) {
-    console.error('Erreur lors du chargement du deck:', error);
-  }
-});
-</script>

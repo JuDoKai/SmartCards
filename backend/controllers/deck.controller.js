@@ -87,7 +87,6 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
 };
 
 
-// 🚀 **Nouvelle fonction `createDeck` qui génère aussi des flashcards automatiquement**
 module.exports.createDeck = async (req, res) => {
   try {
       const { title, description, number, level } = req.body;
@@ -102,7 +101,6 @@ module.exports.createDeck = async (req, res) => {
           return res.status(404).json({ message: "Utilisateur non trouvé." });
       }
 
-      // **1️⃣ Création d'un deck vide**
       const newDeck = new Deck({
           title,
           description,
@@ -115,7 +113,6 @@ module.exports.createDeck = async (req, res) => {
           $push: { decks: savedDeck._id },
       });
 
-      // **2️⃣ Vérification des paramètres pour générer des flashcards**
       if (!number || number <= 0) {
           return res.status(200).json(savedDeck);
       }
@@ -131,7 +128,7 @@ module.exports.createDeck = async (req, res) => {
           return res.status(400).json({ message: "Niveau scolaire invalide." });
       }
 
-      // **3️⃣ Génération des flashcards avec OpenAI**
+      // Génération des flashcards avec OpenAI
       const topic = `${title}: ${description}`;
       const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
 
@@ -152,7 +149,7 @@ module.exports.createDeck = async (req, res) => {
           return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
       }
 
-      // **4️⃣ Sauvegarde des flashcards dans MongoDB**
+      // Sauvegarde des flashcards dans MongoDB
       const flashcardsToInsert = generatedFlashcards.map(flashcard => ({
           question: flashcard.question,
           answer: flashcard.answer,
@@ -161,12 +158,12 @@ module.exports.createDeck = async (req, res) => {
 
       const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
 
-      // **5️⃣ Mise à jour du deck avec les flashcards**
+      // Mise à jour du deck avec les flashcards**
       await Deck.findByIdAndUpdate(savedDeck._id, {
           $push: { flashcards: { $each: insertedFlashcards.map(fc => fc._id) } }
       });
 
-      // **6️⃣ Retour de la réponse finale avec les flashcards**
+      // Retour de la réponse finale avec les flashcards**
       res.status(201).json({
           message: "Deck créé avec succès et flashcards générées.",
           deck: savedDeck,
@@ -180,6 +177,8 @@ module.exports.createDeck = async (req, res) => {
       });
   }
 };
+
+
 
 
 

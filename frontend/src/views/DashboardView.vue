@@ -33,9 +33,9 @@ const addNewDeck = async () => {
   try {
     // Recharge tous les decks depuis l'API
     userDecks.value = await getDecksByUserId(decoded.userId);
-    console.log("🔄 Decks mis à jour depuis l'API !");
+    console.log("Decks mis à jour depuis l'API");
   } catch (error) {
-    console.error("❌ Erreur lors du rechargement des decks :", error);
+    console.error("Erreur lors du rechargement des decks :", error);
   }
 };
 
