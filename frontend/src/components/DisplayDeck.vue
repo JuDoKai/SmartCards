@@ -1,5 +1,6 @@
 <template>
     <h1>Vos Decks</h1>
+    <Loader/>
     <div class="container" v-if="user.decks.length == 0">
       <span class="empty-list">La liste de deck est vide...</span>
     </div>

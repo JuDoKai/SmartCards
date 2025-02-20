@@ -149,10 +149,12 @@ const demoAccess = async () => {
 .register{
     height: 100%;
     width: 100%;
+
 }
 
 h1 {
     padding-left: 1.5rem;
+
 }
 
 form {

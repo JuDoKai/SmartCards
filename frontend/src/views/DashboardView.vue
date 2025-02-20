@@ -1,3 +1,19 @@
+<template>
+  <main>
+    <div class="dashboard">
+      <Navbar :name="userName"/>
+      <div class="display-deck">
+        <CreateDeck 
+         :userId="decoded.userId" 
+         @deckCreated="addNewDeck" />
+        <DisplayDeck :decks="userDecks"/>
+        
+      </div>
+    </div>
+  </main>
+
+</template>
+
 <script setup>
 import Navbar from '@/components/Navbar.vue';
 import CreateDeck from '@/components/CreateDeck.vue';
@@ -40,23 +56,6 @@ const addNewDeck = async () => {
 };
 
 </script>
-
-
-
-<template>
-  <main>
-    <div class="dashboard">
-      <Navbar :name="userName"/>
-      <div class="display-deck">
-        <DisplayDeck :decks="userDecks"/>
-        <CreateDeck 
-         :userId="decoded.userId" 
-         @deckCreated="addNewDeck" />
-      </div>
-    </div>
-  </main>
-
-</template>
 
 
 <style scoped>

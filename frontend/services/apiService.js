@@ -76,7 +76,7 @@ export const getFlashcardById = async() => {
     return reponse.data;
 }
 
-export const createFlashcard = async() => {
+export const createFlashcard = async(deckId) => {
     const reponse = await axios.post(`${BASE_URL}/flashcards/${deckId}`);
     return reponse.data;
 }

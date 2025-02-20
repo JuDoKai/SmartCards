@@ -12,6 +12,23 @@
       </div>
     </div>
   </template>
+
+<script setup>
+import { ref } from "vue";
+
+const props = defineProps({
+  question: String,
+  answer: String,
+});
+
+const isFlipped = ref(false);
+
+// Fonction pour alterner l'affichage de la question et de la réponse
+const toggleFlip = () => {
+  isFlipped.value = !isFlipped.value;
+};
+</script>
+
   
   <style scoped>
   hr {
@@ -70,19 +87,4 @@
   }
   </style>
   
-  <script setup>
-  import { ref } from "vue";
-  
-  const props = defineProps({
-    question: String,
-    answer: String,
-  });
-  
-  const isFlipped = ref(false);
-  
-  // Fonction pour alterner l'affichage de la question et de la réponse
-  const toggleFlip = () => {
-    isFlipped.value = !isFlipped.value;
-  };
-  </script>
   
