@@ -1,6 +1,5 @@
 <template>
     <h1>Vos Decks</h1>
-    <Loader/>
     <div class="container" v-if="user.decks.length == 0">
       <span class="empty-list">La liste de deck est vide...</span>
     </div>
@@ -59,7 +58,7 @@
 
     <div v-if="isModalOpenPen" class="overlay">
       <div class="modal">
-        <p>Modifier Deck</p>
+        <strong><p>Modifier Deck</p></strong>
 
         <form @submit.prevent="newDeck">
           <div class="form-slot">
@@ -90,6 +89,10 @@ const selectedDeckIndex = ref(null);
 const deckTitle = ref("");
 const deckDescription = ref("");
 const errorMessage = ref("");
+
+
+const emit = defineEmits(['flashcardDeleted']);
+
 
 const user = defineProps({
   decks: Array,
@@ -152,7 +155,6 @@ const confirmModifyDeck = async () => {
 
 const showCards = (id) => {
     router.push(`/dashboard/${id}`);
-    
 }
 
 
@@ -172,7 +174,7 @@ h1 {
 
 .deck-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   grid-gap: 20px;
   max-width: 100%;
   padding: 1rem;

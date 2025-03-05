@@ -136,7 +136,7 @@ const demoAccess = async () => {
 <style scoped>
 
 .container{
-    max-width: 50rem;
+    max-width: 40rem;
     width: 80%;
     margin-bottom: 1rem;
 }
@@ -149,7 +149,6 @@ const demoAccess = async () => {
 .register{
     height: 100%;
     width: 100%;
-
 }
 
 h1 {
@@ -161,6 +160,7 @@ form {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    align-content: flex-start;
     gap: 1.5rem;
     border: 2px solid #d9d9d9;
     background-color: #fefcfb;
@@ -170,7 +170,7 @@ form {
 .form-slot {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
 }
 
 .form-slot input {

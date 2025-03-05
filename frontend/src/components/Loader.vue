@@ -4,9 +4,6 @@
         <p>Chargement en cours</p>
         <div class="loader"></div>
     </div>
-    
-
-
 </template>
 
 
@@ -29,7 +26,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2;
+    z-index: 1;
 
 }
 
@@ -43,12 +40,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1;
+      z-index: 1000;
   }
 
 p {
     font-size: 1.5rem;
 }
+
 .loader {
   width: 40px;
   aspect-ratio: 2.5;

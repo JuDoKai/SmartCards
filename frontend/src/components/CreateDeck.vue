@@ -15,14 +15,20 @@
     </div>
   </div>
 
-  <!-- Loader -->
-  <Loader v-if="isLoading" />
+  <!-- 🔥 Wrapper qui englobe tout -->
+  <div v-if="isLoading || isFormVisible" class="overlay">
+    
+    <!-- Loader -->
+    <div v-if="isLoading" class="loader-container">
+      <p>Chargement en cours...</p>
+      <div class="loader"></div>
+    </div>
 
-  <!-- Formulaire Manuel -->
-  <div v-if="isFormVisible && !isAIFormVisible && !isLoading" class="overlay">
-    <div class="modal">
+    <!-- Formulaire Manuel -->
+    <div v-if="isFormVisible && !isAIFormVisible && !isLoading" class="modal">
       <form @submit.prevent="newDeck">
         <div class="form-slot">
+          <strong><p>Création du nouveau deck</p></strong>
           <label for="title">Titre du nouveau Deck </label>
           <input type="text" v-model="title" required />
         </div>
@@ -36,13 +42,12 @@
         <button type="button" @click="closeForm">Annuler</button>
       </form>
     </div>
-  </div>
 
-  <!-- Formulaire IA -->
-  <div v-if="isFormVisible && isAIFormVisible && !isLoading" class="overlay">
-    <div class="modal">
+    <!-- Formulaire IA -->
+    <div v-if="isFormVisible && isAIFormVisible && !isLoading" class="modal">
       <form @submit.prevent="newDeckIA">
         <div class="form-slot">
+          <strong><p>Génération du nouveau deck</p></strong>
           <label for="title">Titre du nouveau Deck </label>
           <input type="text" v-model="title" required />
         </div>
@@ -73,13 +78,13 @@
         <button type="button" @click="closeForm">Annuler</button>
       </form>
     </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { createDeck } from '../../services/apiService';
-import Loader from '@/components/Loader.vue';
 
 const props = defineProps({
   userId: {
@@ -157,11 +162,12 @@ const newDeckIA = async () => {
 };
 </script>
 
+<style scoped>
 
-<style scooped>
 h1 {
   margin-left: 1rem;
 }
+
 .overlay {
     position: fixed;
     top: 0;
@@ -198,9 +204,9 @@ h1 {
 .new-deck {
   font-size: 1.25rem;
   padding: 20px;
-
 }
-.option-title  {
+
+.option-title {
   font-size: 1.4rem;
   height: 5rem;
   width: auto;
@@ -222,4 +228,31 @@ h1 {
     margin-top: 10px;
 }
 
+/* Loader */
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 5px solid black;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
 </style>

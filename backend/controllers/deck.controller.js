@@ -15,6 +15,8 @@ const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber,
       const prompt = `Génère exactement ${Math.min(batchSize, totalNumber - i)} flashcards sur le sujet : ${topic}.
       Niveau : ${levelDescription}.
       Questions et réponses courtes et précises (moins de 10 mots chacune).
+      Chaque question doit être **unique** et chaque **réponse doit être différente**. 
+      Ne jamais donner la même réponse à des questions différentes.
       Réponds uniquement avec un JSON :
       [{"question": "Question ici", "answer": "Réponse ici"}]`;
 

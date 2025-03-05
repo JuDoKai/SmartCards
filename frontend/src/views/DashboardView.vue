@@ -6,7 +6,10 @@
         <CreateDeck 
          :userId="decoded.userId" 
          @deckCreated="addNewDeck" />
-        <DisplayDeck :decks="userDecks"/>
+        <DisplayDeck 
+        :decks="userDecks"
+        @flashcardDeleted="updateDeckSize"
+        />
         
       </div>
     </div>
@@ -54,6 +57,8 @@ const addNewDeck = async () => {
     console.error("Erreur lors du rechargement des decks :", error);
   }
 };
+
+
 
 </script>
 
