@@ -11,7 +11,7 @@
         <div class="deck-capacity">
           <p v-if="deck.flashcards.length == 0">Deck vide</p>
           <p v-else-if="deck.flashcards.length == 1">1 carte</p>
-          <p v-else>{{ deck.flashcards.length }} cartes</p>
+          <p v-else>{{ deck.flashcards.length}} cartes</p>
         </div>
         <div class="options">
           <div @click="showCards(deck._id)">
@@ -91,12 +91,10 @@ const deckDescription = ref("");
 const errorMessage = ref("");
 
 
-const emit = defineEmits(['flashcardDeleted']);
-
-
 const user = defineProps({
   decks: Array,
 });
+
 
 const openDeleteDeckModal = (index) => {
   selectedDeckIndex.value = index;

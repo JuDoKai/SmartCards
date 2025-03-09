@@ -10,6 +10,7 @@
          :deckTitle="deckTitle"
          :deckDescription="deckDescription"
          @flashcardCreated="addNewFlashcard"
+         @flashcardDeleted="flashcardDeleted"
          />
        
         <DisplayFlashcards 
@@ -62,6 +63,19 @@ const addNewFlashcard = async () => {
     console.error("Erreur lors du rechargement des flashcards :", error);
   }
 };
+
+
+
+const flashcardDeleted = async () => {
+  try {
+    // Recharge tous les flashcards du deck depuis l'API
+    flashcards.value = await  getAllFlashcardsByDeckId(deckId);
+  } catch (error) {
+    console.error("Erreur lors du rechargement des decks :", error);
+  }
+};
+
+
 
 </script>
 

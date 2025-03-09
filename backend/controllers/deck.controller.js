@@ -8,34 +8,6 @@ const openaiClient = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-
-const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber, batchSize = 3) => {
-  const batchPromises = [];
-  for (let i = 0; i < totalNumber; i += batchSize) {
-      const prompt = `Génère exactement ${Math.min(batchSize, totalNumber - i)} flashcards sur le sujet : ${topic}.
-      Niveau : ${levelDescription}.
-      Questions et réponses courtes et précises (moins de 10 mots chacune).
-      Chaque question doit être **unique** et chaque **réponse doit être différente**. 
-      Ne jamais donner la même réponse à des questions différentes.
-      Réponds uniquement avec un JSON :
-      [{"question": "Question ici", "answer": "Réponse ici"}]`;
-
-      batchPromises.push(
-          openaiClient.chat.completions.create({
-              model: "gpt-3.5-turbo",
-              messages: [
-                  { role: "system", content: "Tu es un assistant qui génère des flashcards." },
-                  { role: "user", content: prompt }
-              ],
-              max_tokens: 150,
-              temperature: 0.5
-          })
-      );
-  }
-
-  return await Promise.all(batchPromises);
-};
-
 module.exports.getAllDecks = async (req, res) => {
     try {
       const decks = await Deck.find()
@@ -88,96 +60,144 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
   }
 };
 
+const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber, batchSize = 3) => {
+  const batchPromises = [];
+  for (let i = 0; i < totalNumber; i += batchSize) {
+      const prompt = `Génère exactement ${Math.min(batchSize, totalNumber - i)} flashcards sur le sujet : ${topic}.
+      Niveau : ${levelDescription}.
+      Questions et réponses courtes et précises (moins de 10 mots chacune).
+      Chaque question doit être **unique** et chaque **réponse doit être différente**. 
+      Ne jamais donner la même réponse à des questions différentes.
+      Réponds uniquement avec un JSON :
+      [{"question": "Question ici", "answer": "Réponse ici"}]`;
+
+      batchPromises.push(
+          openaiClient.chat.completions.create({
+              model: "gpt-3.5-turbo",
+              messages: [
+                  { role: "system", content: "Tu es un assistant qui génère des flashcards." },
+                  { role: "user", content: prompt }
+              ],
+              max_tokens: 150,
+              temperature: 0.5
+          })
+      );
+  }
+
+  return await Promise.all(batchPromises);
+};
+
+const checkDuplicateFlashcards = async (flashcards) => {
+  const existingFlashcards = await FlashcardModel.find({
+      $or: flashcards.map(flashcard => ({
+          $and: [
+              { question: flashcard.question },
+              { answer: flashcard.answer }
+          ]
+      }))
+  });
+
+  return existingFlashcards.map(fc => `${fc.question} - ${fc.answer}`);
+};
 
 module.exports.createDeck = async (req, res) => {
-  try {
-      const { title, description, number, level } = req.body;
-      const { userId } = req.params;
+try {
+    const { title, description, number, level } = req.body;
+    const { userId } = req.params;
 
-      if (!title) {
-          return res.status(400).json({ message: "Le titre est requis." });
-      }
+    if (!title) {
+        return res.status(400).json({ message: "Le titre est requis." });
+    }
 
-      const user = await User.findById(userId);
-      if (!user) {
-          return res.status(404).json({ message: "Utilisateur non trouvé." });
-      }
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
 
-      const newDeck = new Deck({
-          title,
-          description,
-          user: userId,
-      });
+    const newDeck = new Deck({
+        title,
+        description,
+        user: userId,
+    });
 
-      const savedDeck = await newDeck.save();
+    const savedDeck = await newDeck.save();
 
-      await User.findByIdAndUpdate(userId, {
-          $push: { decks: savedDeck._id },
-      });
+    await User.findByIdAndUpdate(userId, {
+        $push: { decks: savedDeck._id },
+    });
 
-      if (!number || number <= 0) {
-          return res.status(200).json(savedDeck);
-      }
+    if (!number || number <= 0) {
+        return res.status(200).json(savedDeck);
+    }
 
-      const levelDescriptions = {
-          Primaire: "questions simples et adaptées aux enfants en école primaire.",
-          Collège: "questions adaptées aux élèves du collège, avec une difficulté modérée.",
-          Lycée: "questions complexes adaptées aux élèves du lycée.",
-          Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires.",
-      };
+    const levelDescriptions = {
+        Primaire: "questions simples et adaptées aux enfants en école primaire.",
+        Collège: "questions adaptées aux élèves du collège, avec une difficulté modérée.",
+        Lycée: "questions complexes adaptées aux élèves du lycée.",
+        Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires.",
+    };
 
-      if (!levelDescriptions[level]) {
-          return res.status(400).json({ message: "Niveau scolaire invalide." });
-      }
+    if (!levelDescriptions[level]) {
+        return res.status(400).json({ message: "Niveau scolaire invalide." });
+    }
 
-      // Génération des flashcards avec OpenAI
-      const topic = `${title}: ${description}`;
-      const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
+    // Génération des flashcards avec OpenAI
+    const topic = `${title}: ${description}`;
+    const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
 
-      let generatedFlashcards = [];
-      for (const response of aiResponses) {
-          try {
-              const rawText = response.choices[0]?.message?.content?.trim();
-              const parsedFlashcards = JSON.parse(rawText);
-              if (Array.isArray(parsedFlashcards)) {
-                  generatedFlashcards = [...generatedFlashcards, ...parsedFlashcards];
-              }
-          } catch (error) {
-              console.error("Erreur de parsing JSON:", error);
-          }
-      }
+    let generatedFlashcards = [];
+    for (const response of aiResponses) {
+        try {
+            const rawText = response.choices[0]?.message?.content?.trim();
+            const parsedFlashcards = JSON.parse(rawText);
+            if (Array.isArray(parsedFlashcards)) {
+                generatedFlashcards = [...generatedFlashcards, ...parsedFlashcards];
+            }
+        } catch (error) {
+            console.error("Erreur de parsing JSON:", error);
+        }
+    }
 
-      if (generatedFlashcards.length === 0) {
-          return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
-      }
+    if (generatedFlashcards.length === 0) {
+        return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
+    }
 
-      // Sauvegarde des flashcards dans MongoDB
-      const flashcardsToInsert = generatedFlashcards.map(flashcard => ({
-          question: flashcard.question,
-          answer: flashcard.answer,
-          deck: savedDeck._id,
-      }));
+    // Vérification des doublons avant l'insertion
+    const duplicateFlashcards = await checkDuplicateFlashcards(generatedFlashcards);
+    if (duplicateFlashcards.length > 0) {
+        return res.status(400).json({
+            message: "Certaines flashcards sont déjà présentes dans la base de données.",
+            duplicates: duplicateFlashcards
+        });
+    }
 
-      const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
+    // Sauvegarde des flashcards dans MongoDB
+    const flashcardsToInsert = generatedFlashcards.map(flashcard => ({
+        question: flashcard.question,
+        answer: flashcard.answer,
+        deck: savedDeck._id,
+    }));
 
-      // Mise à jour du deck avec les flashcards**
-      await Deck.findByIdAndUpdate(savedDeck._id, {
-          $push: { flashcards: { $each: insertedFlashcards.map(fc => fc._id) } }
-      });
+    const insertedFlashcards = await Flashcard.insertMany(flashcardsToInsert);
 
-      // Retour de la réponse finale avec les flashcards**
-      res.status(201).json({
-          message: "Deck créé avec succès et flashcards générées.",
-          deck: savedDeck,
-          flashcards: insertedFlashcards,
-      });
+    // Mise à jour du deck avec les flashcards
+    await Deck.findByIdAndUpdate(savedDeck._id, {
+        $push: { flashcards: { $each: insertedFlashcards.map(fc => fc._id) } }
+    });
 
-  } catch (error) {
-      res.status(500).json({
-          message: 'Erreur lors de la création du deck et de la génération des flashcards.',
-          error: error.message
-      });
-  }
+    // Retour de la réponse finale avec les flashcards
+    res.status(201).json({
+        message: "Deck créé avec succès et flashcards générées.",
+        deck: savedDeck,
+        flashcards: insertedFlashcards,
+    });
+
+} catch (error) {
+    res.status(500).json({
+        message: 'Erreur lors de la création du deck et de la génération des flashcards.',
+        error: error.message
+    });
+}
 };
 
 

@@ -34,14 +34,14 @@ const userDecks = ref([]);
 onMounted(async () => {
   try {
 
-    // Users Info
     const userId = decoded.userId;
     const userData = await getUserById(userId);
    
     userName.value = userData.username;
 
     // Decks Info (Display Deck)
-    userDecks.value = await getDecksByUserId(userId);     
+    userDecks.value = await getDecksByUserId(userId);
+    console.log(userDecks.value);
 
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'utilisateur:', error);

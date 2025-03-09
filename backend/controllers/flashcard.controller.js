@@ -105,7 +105,6 @@ module.exports.createFlashcard = async (req, res) => {
 };
 
 
-
 const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber, batchSize = 3) => {
     const batchPromises = [];
     for (let i = 0; i < totalNumber; i += batchSize) {
@@ -133,11 +132,23 @@ const generateFlashcardsInBatches = async (topic, levelDescription, totalNumber,
     return await Promise.all(batchPromises);
 };
 
+const checkDuplicateFlashcards = async (flashcards) => {
+    const existingFlashcards = await FlashcardModel.find({
+        $or: flashcards.map(flashcard => ({
+            $and: [
+                { question: flashcard.question },
+                { answer: flashcard.answer }
+            ]
+        }))
+    });
+
+    return existingFlashcards.map(fc => `${fc.question} - ${fc.answer}`);
+};
+
 module.exports.generateFlashcards = async (req, res) => {
     try {
         const { number, level } = req.body;
         const { deckId } = req.params;
-        
 
         const parsedNumber = parseInt(number);
         if (!parsedNumber || parsedNumber <= 0) {
@@ -181,7 +192,16 @@ module.exports.generateFlashcards = async (req, res) => {
             return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
         }
 
-        // 🔹 Optimisation MongoDB : insertion en masse avec bulkWrite
+        // Vérifier les doublons avant l'insertion
+        const duplicateFlashcards = await checkDuplicateFlashcards(generatedFlashcards);
+        if (duplicateFlashcards.length > 0) {
+            return res.status(400).json({
+                message: "Certaines flashcards sont déjà présentes dans la base de données.",
+                duplicates: duplicateFlashcards
+            });
+        }
+
+        // Insertion en masse des flashcards uniques
         const bulkOps = generatedFlashcards.map(flashcard => ({
             insertOne: {
                 document: {
@@ -194,7 +214,7 @@ module.exports.generateFlashcards = async (req, res) => {
 
         const result = await FlashcardModel.bulkWrite(bulkOps);
 
-        // 🔹 Mise à jour du deck avec les nouvelles flashcards
+        // Mise à jour du deck avec les nouvelles flashcards
         await DeckModel.updateOne(
             { _id: deckId },
             { $push: { flashcards: { $each: Object.values(result.insertedIds) } } }
@@ -212,6 +232,7 @@ module.exports.generateFlashcards = async (req, res) => {
         });
     }
 };
+
 
 
 module.exports.modifyFlashcard = async (req, res) => {
@@ -236,23 +257,38 @@ module.exports.modifyFlashcard = async (req, res) => {
     }
 };
 
-
 module.exports.deleteFlashcard = async (req, res) => {
     try {
         const { id } = req.params;
-        const deletedFlashcard = await FlashcardModel.findById(id);
+        console.log("Tentative de suppression de la flashcard avec l'ID :", id);
 
-    if (!deletedFlashcard) {
-        res.status(404).json({message: "Flashcard non trouvé."});
-    };
+        // 1. Supprimer la flashcard dans la collection flashcards
+        const flashcard = await FlashcardModel.findById(id);
+        
+        if (!flashcard) {
+            console.log("Flashcard non trouvée !");
+            return res.status(404).json({ message: "Flashcard non trouvée." });
+        }
 
-    await deletedFlashcard.deleteOne();
-    res.status(200).json("Flashcard supprimé " + req.params.id);
+        // 2. Supprimer l'ID de la flashcard des decks qui la contiennent
+        await DeckModel.updateMany(
+            { flashcards: id },  // Trouver les decks contenant l'ID de cette flashcard
+            { $pull: { flashcards: id } }  // Retirer l'ID de la flashcard du tableau flashcards
+        );
+        console.log("Références à la flashcard supprimées des decks.");
 
+        // 3. Supprimer la flashcard de la collection flashcards
+        await FlashcardModel.findByIdAndDelete(id);
+        console.log("Flashcard supprimée avec succès :", id);
+
+        res.status(200).json({ message: "Flashcard supprimée", id });
     } catch (error) {
-        res.status(500).json({ 
-          message: 'Erreur lors de la suppression de la Flashcard.',
-          error: error.message 
+        console.error("Erreur lors de la suppression :", error.message);
+        res.status(500).json({
+            message: "Erreur lors de la suppression de la Flashcard.",
+            error: error.message
         });
-    };
+    }
 };
+
+
