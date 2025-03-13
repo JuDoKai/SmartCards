@@ -166,8 +166,10 @@ h1 {
 }
 
 .empty-list {
-    font-size: clamp(1rem, 5vw, 3rem);
-    opacity: 0.5;
+  display: flex;
+  justify-content: center;
+  font-size: clamp(1rem, 5vw, 3rem);
+  opacity: 0.5;
 }
 
 .deck-container {

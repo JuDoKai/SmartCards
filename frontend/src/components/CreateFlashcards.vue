@@ -14,10 +14,15 @@
         </button>
       </div>
     </div>
+
+    <div v-if="isLoading || isFormVisible" class="overlay">
+      <div v-if="isLoading" class="loader-container">
+        <p>Chargement en cours...</p>
+        <Loader/>
+      </div>
   
       <!-- Formulaire Manuel -->
-      <div v-if="isFormVisible && !isAIFormVisible" class="overlay">
-      <div class="modal">
+      <div v-if="isFormVisible && !isAIFormVisible && !isLoading" class="modal">
         <form @submit.prevent="newFlashcard">
           <div class="form-slot">
             <strong><p>Création de Flashcard (Manuellement)</p></strong>
@@ -34,12 +39,12 @@
           <button type="submit">Valider</button>
           <button type="button" @click="closeForm">Annuler</button>
         </form>
-      </div>
     </div>
+
+
   
     <!-- Formulaire IA -->
-    <div v-if="isFormVisible && isAIFormVisible" class="overlay">
-      <div class="modal">
+    <div v-if="isFormVisible && isAIFormVisible && !isLoading" class="modal">
         <form @submit.prevent="newFlashcardIA">  
           <div class="form-slot">
             <strong><p>Création de Flashcard (IA)</p></strong>
@@ -64,12 +69,15 @@
           <button type="button" @click="closeForm">Annuler</button>
         </form>
       </div>
-    </div>
+  </div>
+
   </template>
 
 <script setup>
 import { ref } from 'vue';
 import { createFlashcard, generateFlashcard } from '../../services/apiService';
+import Loader from './Loader.vue';
+
 
 const props = defineProps({
   deckId: String,
@@ -85,6 +93,7 @@ const flashcardsNumber = ref(1);
 const flashcardsLevel = ref('Primaire');
 const isFormVisible = ref(false);
 const isAIFormVisible = ref(false);
+const isLoading = ref(false);
 const errorMessage = ref('');
 
 
@@ -102,6 +111,7 @@ const closeForm = () => {
 };
 
 const newFlashcard = async () => {
+  isLoading.value = true;
   try {
     const flashcardData = {
       question: question.value,
@@ -117,11 +127,14 @@ const newFlashcard = async () => {
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Erreur lors de la création de la flashcard.';
     console.error(error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
 
 const newFlashcardIA = async () => {
+  isLoading.value = true;
   try {
     const flashcardData = {
       number: flashcardsNumber.value,
@@ -137,12 +150,14 @@ const newFlashcardIA = async () => {
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Erreur lors de la génération des flashcards.';
     console.error(error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
 </script>
 
-<style scooped>
+<style scoped>
 h1 {
   margin-left: 1rem;
 }
@@ -199,6 +214,18 @@ h1 {
   display: flex;
   gap: 8px;
   align-items: center;  
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
 }
 
 .error {

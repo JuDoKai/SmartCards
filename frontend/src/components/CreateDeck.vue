@@ -15,13 +15,10 @@
     </div>
   </div>
 
-  <!-- 🔥 Wrapper qui englobe tout -->
   <div v-if="isLoading || isFormVisible" class="overlay">
-    
-    <!-- Loader -->
     <div v-if="isLoading" class="loader-container">
       <p>Chargement en cours...</p>
-      <div class="loader"></div>
+      <Loader/>
     </div>
 
     <!-- Formulaire Manuel -->
@@ -85,6 +82,7 @@
 <script setup>
 import { ref } from 'vue';
 import { createDeck } from '../../services/apiService';
+import Loader from './Loader.vue';
 
 const props = defineProps({
   userId: {
@@ -148,6 +146,8 @@ const newDeckIA = async () => {
       level: flashcardsLevel.value,
     };
 
+    console.log("Données envoyées au backend :", deckData);
+
     const response = await createDeck(props.userId, deckData);
     console.log("Deck créé avec succès :", response);
 
@@ -174,11 +174,10 @@ h1 {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 10;
 }
 
 .modal {

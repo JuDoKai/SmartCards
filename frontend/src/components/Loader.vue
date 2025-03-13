@@ -1,5 +1,5 @@
 <template>
-    <div class="overlay"></div>
+   
     <div class="container">
         <p>Chargement en cours</p>
         <div class="loader"></div>
@@ -29,19 +29,6 @@
     z-index: 1;
 
 }
-
-.overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-  }
 
 p {
     font-size: 1.5rem;

@@ -35,10 +35,17 @@ export const getAllDecks = async() => {
     return response.data; 
 }
 
-export const getDecksByUserId = async(userId) => {
-    const response = await axios.get(`${BASE_URL}/decks/${userId}`);
-    return response.data; 
-}
+export const getDecksByUserId = async (userId) => {
+    try {
+        const response = await axios.get(`${BASE_URL}/decks/${userId}`);
+        return response.data || []; // Retourne un tableau vide si aucun deck trouvé
+    } catch (error) {
+        if (error.response && error.response.status === 404) {
+            return []; // Retourne un tableau vide au lieu de lever une erreur
+        }
+        throw error; // Relance l'erreur pour d'autres cas d'échec
+    }
+};
 
 export const getDeckByDeckId = async(deckId) => {
     const response = await axios.get(`${BASE_URL}/decks/${deckId}`);

@@ -70,6 +70,7 @@ hr {
   position: absolute;
   width: 100%;
   height: 100%;
+  font-size: 1.3rem;  
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   display: flex;

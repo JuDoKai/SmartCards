@@ -30,20 +30,19 @@ import Auth from '@/components/Auth.vue';
     font-family: Georgia serif;
     font-style: italic;
     font-weight: 100;
-    position: relative;
 }
  
 .title h1 {
     font-weight: 100;
-    font-size: clamp(3rem, 7vw, 5rem);
+    font-size: clamp(3rem, 7vw, 4rem);
 
 }
 
 .title h2 {
     font-weight: 100;
-    font-size: clamp(1rem, 3.5vw, 2rem);
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
     position: absolute;
-    top: calc(40px + 3vw);
+    top: calc(35px + 3vw);
 }
 
 .title p {

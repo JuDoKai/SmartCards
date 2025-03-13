@@ -41,7 +41,6 @@ onMounted(async () => {
 
     // Decks Info (Display Deck)
     userDecks.value = await getDecksByUserId(userId);
-    console.log(userDecks.value);
 
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'utilisateur:', error);

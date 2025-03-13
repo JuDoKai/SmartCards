@@ -138,29 +138,22 @@ const demoAccess = async () => {
 .container{
     max-width: 40rem;
     width: 80%;
-    margin-bottom: 1rem;
 }
 
-.login {
-    height: 100%;
-    width: 100%;
-}
-
-.register{
+.login,
+.register {
     height: 100%;
     width: 100%;
 }
 
 h1 {
     padding-left: 1.5rem;
-
 }
 
 form {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    align-content: flex-start;
     gap: 1.5rem;
     border: 2px solid #d9d9d9;
     background-color: #fefcfb;
@@ -171,13 +164,17 @@ form {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .form-slot input {
-    padding: 0.5rem 0 0.5rem 0.75rem;
+    align-self: center;
+    width: 100%;
+    padding: 0.5rem 0 0.5rem 0.5rem;
     border-radius: 0.5rem;
     border: 2px solid #d9d9d9;
 }
+
 
 .form-slot input:focus {
     outline: 2px solid;
@@ -204,7 +201,7 @@ form {
     color: #fefcfb;
     background-color: #cf7600;
     border-radius: 0.75rem;
-    padding: 1rem 2rem;
+    padding: 0.75rem 1rem;
     white-space: nowrap;
     cursor: pointer;
     font-weight: 700;
