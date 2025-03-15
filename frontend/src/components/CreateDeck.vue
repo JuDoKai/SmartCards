@@ -16,6 +16,7 @@
   </div>
 
   <div v-if="isLoading || isFormVisible" class="overlay">
+    
     <div v-if="isLoading" class="loader-container">
       <p>Chargement en cours...</p>
       <Loader/>
@@ -166,6 +167,7 @@ const newDeckIA = async () => {
 
 h1 {
   margin-left: 1rem;
+  font-size: clamp(1.25rem, 7vw, 2rem);
 }
 
 .overlay {
@@ -174,6 +176,7 @@ h1 {
     left: 0;
     width: 100vw;
     height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,7 +209,7 @@ h1 {
 }
 
 .option-title {
-  font-size: 1.4rem;
+  font-size: clamp(0.5rem, 4vw, 1.4rem);
   height: 5rem;
   width: auto;
   padding: 0 1rem 0 1rem;

@@ -74,9 +74,5 @@ main {
   width: 100%;
 }
 
-.display-deck {
-  margin: 0 1rem 0 1rem;
-}
-
 
 </style>
