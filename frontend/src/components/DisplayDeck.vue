@@ -4,7 +4,8 @@
       <span class="empty-list">La liste de deck est vide...</span>
     </div>
 
-    <div class="filter">
+    <div class="organization">
+      <div class="filter">
       <form @submit.prevent="filterDeck">
         <label for="filter">Filtre : </label>
         <select v-model="filterMode" name="filter" @change="filterDeck">
@@ -16,8 +17,20 @@
         </select>
       </form>
     </div>
+      <div class="display">
+        <form @submit.prevent="DisplayDeck">
+          <label for="display">Affichage : </label>
+          <select v-model="displayMode" name="display" @change="DisplayDeck">
+            <option value="simple">Simple</option>
+            <option value="details">Détails</option>
+          </select>
+        </form>
+      </div>
+    </div>
 
-    <div class="deck-container">
+   
+
+    <div v-if="displayMode == 'simple'" class="deck-container" >
       <div class="deck-item" v-for="(deck, index) in filteredDecks" :key="deck._id">
         <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
         <div class="deck-description"><i>{{ deck.description }}</i></div>
@@ -50,7 +63,43 @@
               alt="Supprimer le Deck"
             />
           </div>
-         
+        </div>
+      </div>
+    </div>
+
+    <div v-if="displayMode == 'details'" class="deck-container" >
+      <div class="deck-item" v-for="(deck, index) in filteredDecks" :key="deck._id">
+        <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
+        <div class="deck-description"><i>{{ deck.description }}</i></div>
+        <div class="deck-capacity">
+          <p v-if="deck.flashcards.length == 0">Deck vide</p>
+          <p v-else-if="deck.flashcards.length == 1">1 carte</p>
+          <p v-else>{{ deck.flashcards.length}} cartes</p>
+        </div>
+        <div class="options">
+          <div @click="showCards(deck._id)">
+            <div class="eye">
+              <img
+                src="@/assets/icons/eye.svg"
+                title="Afficher les cartes du deck"
+                alt="Afficher les cartes du deck"
+              />
+            </div>
+          </div>
+          <div @click="openModifyDeckModal(index)" class="pen">
+            <img
+              src="@/assets/icons/pen.svg"
+              title="Modifier le deck"
+              alt="Modifier le Deck"
+            />
+          </div>
+          <div @click="openDeleteDeckModal(index)" class="trash">
+            <img
+              src="@/assets/icons/trash.svg"
+              title="Supprimer le deck"
+              alt="Supprimer le Deck"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -105,6 +154,8 @@ const selectedDeckIndex = ref(null);
 const deckTitle = ref("");
 const deckDescription = ref("");
 const filterMode = ref("default");
+const displayMode = ref("simple");
+
 const errorMessage = ref("");
 
 
@@ -194,6 +245,15 @@ const filteredDecks = computed(() => {
 h1 {
   margin-left: 1rem;
   font-size: clamp(1.25rem, 7vw, 2rem);
+}
+
+.organization {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-right: 20px;
 }
 
 .overlay {
