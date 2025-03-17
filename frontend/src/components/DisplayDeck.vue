@@ -5,13 +5,13 @@
     </div>
 
     <div class="organization">
-      <div class="filter">
-      <form @submit.prevent="filterDeck">
-        <label for="filter">Filtre : </label>
-        <select v-model="filterMode" name="filter" @change="filterDeck">
+      <div class="sort">
+      <form @submit.prevent="sortDeck">
+        <label for="sort">Tri : </label>
+        <select v-model="sortMode" name="sort" @change="sortDeck">
           <option value="default">Défaut</option>
           <option value="alphabetical">Alphabétique</option>
-          <option value="chnonological">Chronologique</option>
+          <option value="chronological">Chronologique</option>
           <option value="ascending">Croissant</option>
           <option value="descending">Décroissant</option>
         </select>
@@ -22,85 +22,39 @@
           <label for="display">Affichage : </label>
           <select v-model="displayMode" name="display" @change="DisplayDeck">
             <option value="simple">Simple</option>
-            <option value="details">Détails</option>
+            <option value="list">Liste</option>
           </select>
         </form>
       </div>
     </div>
 
-   
 
-    <div v-if="displayMode == 'simple'" class="deck-container" >
-      <div class="deck-item" v-for="(deck, index) in filteredDecks" :key="deck._id">
-        <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
-        <div class="deck-description"><i>{{ deck.description }}</i></div>
-        <div class="deck-capacity">
-          <p v-if="deck.flashcards.length == 0">Deck vide</p>
-          <p v-else-if="deck.flashcards.length == 1">1 carte</p>
-          <p v-else>{{ deck.flashcards.length}} cartes</p>
-        </div>
-        <div class="options">
-          <div @click="showCards(deck._id)">
-            <div class="eye">
-              <img
-                src="@/assets/icons/eye.svg"
-                title="Afficher les cartes du deck"
-                alt="Afficher les cartes du deck"
-              />
-            </div>
-          </div>
-          <div @click="openModifyDeckModal(index)" class="pen">
-            <img
-              src="@/assets/icons/pen.svg"
-              title="Modifier le deck"
-              alt="Modifier le Deck"
-            />
-          </div>
-          <div @click="openDeleteDeckModal(index)" class="trash">
-            <img
-              src="@/assets/icons/trash.svg"
-              title="Supprimer le deck"
-              alt="Supprimer le Deck"
-            />
-          </div>
-        </div>
+
+    <div v-if="displayMode == 'simple'" class="deck-container-simple" >
+      <div v-for="deck in sortedDecks" :key="deck._id">
+        <Deck
+          :display="displayMode"
+          :deckTitle="deck.title"
+          :deckDescription="deck.description"
+          :deckLength="deck.flashcards.length"
+          @showCards="showCards(deck._id)"
+          @modifyDeck="openModifyDeckModal(deck._id)"
+          @deleteDeck="openDeleteDeckModal(deck._id)"
+        />
       </div>
     </div>
 
-    <div v-if="displayMode == 'details'" class="deck-container" >
-      <div class="deck-item" v-for="(deck, index) in filteredDecks" :key="deck._id">
-        <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
-        <div class="deck-description"><i>{{ deck.description }}</i></div>
-        <div class="deck-capacity">
-          <p v-if="deck.flashcards.length == 0">Deck vide</p>
-          <p v-else-if="deck.flashcards.length == 1">1 carte</p>
-          <p v-else>{{ deck.flashcards.length}} cartes</p>
-        </div>
-        <div class="options">
-          <div @click="showCards(deck._id)">
-            <div class="eye">
-              <img
-                src="@/assets/icons/eye.svg"
-                title="Afficher les cartes du deck"
-                alt="Afficher les cartes du deck"
-              />
-            </div>
-          </div>
-          <div @click="openModifyDeckModal(index)" class="pen">
-            <img
-              src="@/assets/icons/pen.svg"
-              title="Modifier le deck"
-              alt="Modifier le Deck"
-            />
-          </div>
-          <div @click="openDeleteDeckModal(index)" class="trash">
-            <img
-              src="@/assets/icons/trash.svg"
-              title="Supprimer le deck"
-              alt="Supprimer le Deck"
-            />
-          </div>
-        </div>
+    <div v-if="displayMode == 'list'" class="deck-container-list" >
+      <div v-for="deck in sortedDecks" :key="deck._id">
+        <Deck
+          :display="displayMode"
+          :deckTitle="deck.title"
+          :deckDescription="deck.description"
+          :deckLength="deck.flashcards.length"
+          @showCards="showCards(deck._id)"
+          @modifyDeck="openModifyDeckModal(deck._id)"
+          @deleteDeck="openDeleteDeckModal(deck._id)"
+        />
       </div>
     </div>
 
@@ -139,7 +93,6 @@
       </div>
     </div>
 
-    
 </template>
   
 <script setup>
@@ -147,14 +100,17 @@
 import { ref, computed } from "vue";
 import router from "@/router";
 import { deleteDeck, updateDeck } from "../../services/apiService";
+import Deck from "./Deck.vue";
+
 
 const isModalOpenTrash = ref(false);
 const isModalOpenPen = ref(false);
 const selectedDeckIndex = ref(null);
 const deckTitle = ref("");
 const deckDescription = ref("");
-const filterMode = ref("default");
+const sortMode = ref("default");
 const displayMode = ref("simple");
+
 
 const errorMessage = ref("");
 
@@ -164,10 +120,26 @@ const user = defineProps({
 });
 
 
-const openDeleteDeckModal = (index) => {
-  selectedDeckIndex.value = index;
-  deckTitle.value = user.decks[index].title;
-  isModalOpenTrash.value = true;
+const openDeleteDeckModal = (deckId) => {
+  const deck = user.decks.find(d => d._id === deckId);
+  if (deck) {
+    selectedDeckIndex.value = deckId;
+    deckTitle.value = deck.title;
+    isModalOpenTrash.value = true;
+  }
+};
+const confirmDeleteDeck = async () => {
+  try {
+    await deleteDeck(selectedDeckIndex.value);
+    const indexToDelete = user.decks.findIndex(d => d._id === selectedDeckIndex.value);
+    if (indexToDelete !== -1) {
+      user.decks.splice(indexToDelete, 1);
+    }
+    closeModal();
+    console.log("Deck supprimé :", selectedDeckIndex.value);
+  } catch (error) {
+    console.error("Erreur lors de la suppression du deck :", error);
+  }
 };
 
 const closeModal = () => {
@@ -181,37 +153,33 @@ const closeModal = () => {
 };
 
 
-const openModifyDeckModal = (index) => {
-  selectedDeckIndex.value = index;
-  deckTitle.value = user.decks[index].title;
-  deckDescription.value = user.decks[index].description;
-  isModalOpenPen.value = true;
-}
-
-const confirmDeleteDeck = async () => {
-  const deckId = user.decks[selectedDeckIndex.value]._id;
-  try {
-    await deleteDeck(deckId);
-    user.decks.splice(selectedDeckIndex.value, 1);
-    closeModal();
-    console.log("Deck supprimé :", deckId);
-  } catch (error) {
-    console.error("Erreur lors de la suppression du deck :", error);
+const openModifyDeckModal = (deckId) => {
+  const deck = user.decks.find(d => d._id === deckId);
+  if (deck) {
+    selectedDeckIndex.value = deckId;
+    deckTitle.value = deck.title;
+    deckDescription.value = deck.description;
+    isModalOpenPen.value = true;
   }
 };
 
+
+
 const confirmModifyDeck = async () => {
-  const deckId = user.decks[selectedDeckIndex.value]._id;
+  const deckId = selectedDeckIndex.value;
   const deckData = {
-    title: deckTitle.value.trim(), 
+    title: deckTitle.value.trim(),
     description: deckDescription.value.trim(),
   };
 
   try {
     await updateDeck(deckId, deckData);
-    user.decks[selectedDeckIndex.value].title = deckData.title; 
-    user.decks[selectedDeckIndex.value].description = deckData.description;
-    closeModal(); 
+    const deckToUpdate = user.decks.find(d => d._id === deckId);
+    if (deckToUpdate) {
+      deckToUpdate.title = deckData.title;
+      deckToUpdate.description = deckData.description;
+    }
+    closeModal();
   } catch (error) {
     console.error("Erreur lors de la modification du deck :", error);
     errorMessage.value = "Une erreur est survenue lors de la modification.";
@@ -223,14 +191,14 @@ const showCards = (id) => {
     router.push(`/dashboard/${id}`);
 }
 
-const filteredDecks = computed(() => {
-  if (filterMode.value === "alphabetical") {
+const sortedDecks = computed(() => {
+  if (sortMode.value === "alphabetical") {
     return [...user.decks].sort((a, b) => a.title.localeCompare(b.title));
-  } else if (filterMode.value === "chnonological") {
-    return [...user.decks].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  } else if (filterMode.value === "ascending") {
+  } else if (sortMode.value === "chronological") {
+    return [...user.decks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortMode.value === "ascending") {
     return [...user.decks].sort((a, b) => a.flashcards.length - b.flashcards.length);
-  } else if (filterMode.value === "descending") {
+  } else if (sortMode.value === "descending") {
     return [...user.decks].sort((a, b) => b.flashcards.length - a.flashcards.length);
   } 
   return user.decks;
@@ -249,11 +217,11 @@ h1 {
 
 .organization {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  gap: 10px;
   justify-content: flex-end;
   align-items: flex-end;
-  margin-right: 20px;
+  margin-right: 30px;
+  margin-bottom: 15px;
 }
 
 .overlay {
@@ -286,52 +254,22 @@ h1 {
   opacity: 0.5;
 }
 
-.deck-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  grid-gap: 20px;
-  max-width: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-  overflow: hidden;
-}
 
 .deck-container p {
   font-size: clamp(0.75rem, 4vw, 1.4rem);
- 
 }
 
-.deck-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    padding: 1rem;
-    border: 4px solid black;
-    border-radius: 8px;
-    background-color: rgb(255, 244, 224);
-    font-size: 1.4rem;
-}
- 
 .deck-capacity p{
     margin: 0;
 }
 
-.options {
-    display: flex;
-    gap: 3rem;
-    margin-top: 1rem;
-}
-
-.options img {
-  height: 30px;
-  width: 30px;
-}
-
-.eye,
-.trash,
-.pen {
-    cursor: pointer;
+.deck-container-simple {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ajuste la taille des éléments avec minmax */
+  gap: 20px;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .form-slot {
@@ -353,8 +291,6 @@ h1 {
 .form-slot input:focus {
     outline: 2px solid;
 }
-
-
 
 .buttons {
   display: flex;

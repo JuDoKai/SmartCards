@@ -20,7 +20,7 @@
                             alt="Accéder au profil"
                             width="20"
                             height="20"
-                            />Profil
+                            />{{ user.name }}
                     </li>
                     <li @click="logout()">
                         <img
@@ -45,7 +45,7 @@
                         alt="Accéder au profil"
                         width="20"
                         height="20"
-                        />Profil
+                        />{{ user.name }}
                 </li>
                 <li @click="logout()">
                     <img

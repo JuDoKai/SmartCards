@@ -2,7 +2,7 @@
 
 <main>
     <div class="dashboard">
-      <Navbar/>
+      <Navbar :name="userName"/>
       <div class="display-flashcards">
 
          <CreateFlashcards
@@ -37,6 +37,7 @@ const deckId = props["id"];
 const flashcards = ref([]);
 const deckTitle = ref('');
 const deckDescription = ref('');
+const userName = ref('');
 
 
 onMounted(async () => {
@@ -45,9 +46,12 @@ onMounted(async () => {
     flashcards.value = data;
     
     const data2 = await getDeckByDeckId(deckId);
+    userName.value = data2.user.username;
 
     deckTitle.value = data2.title;
     deckDescription.value = data2.description;
+
+    // const data3 = await getUserById();
 
   } catch (error) {
     console.error("Erreur lors du chargement des flashcards:", error);

@@ -1,108 +1,199 @@
 <template>
-
-    <!--  Affichage Simple -->
-
-    <div v-if="displayMode == 'simple'" class="deck-container" >
-      <div class="deck-item">
-        <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
-        <div class="deck-description"><i>{{ deck.description }}</i></div>
-        <div class="deck-capacity">
-          <p v-if="deckLength == 0">Deck vide</p>
-          <p v-else-if="deckLength == 1">1 carte</p>
-          <p v-else>{{ deckLength }} cartes</p>
-        </div>
-        <div class="options">
-          <div @click="showCards(deck._id)">
-            <div class="eye">
-              <img
-                src="@/assets/icons/eye.svg"
-                title="Afficher les cartes du deck"
-                alt="Afficher les cartes du deck"
-              />
+    <div v-if="display == 'simple'" class="deck-container-simple">
+        <div class="deck-item">
+            <div class="deck-title"><strong>{{ props.deckTitle }}</strong><br /></div>
+            <div class="deck-description"><i>{{ props.deckDescription }}</i></div>
+            <div class="deck-capacity">
+                <p v-if="props.deckLength == 0">Deck vide</p>
+                <p v-else-if="props.deckLength == 1">1 carte</p>
+                <p v-else>{{ props.deckLength }} cartes</p>
             </div>
-          </div>
-          <div @click="openModifyDeckModal(index)" class="pen">
-            <img
-              src="@/assets/icons/pen.svg"
-              title="Modifier le deck"
-              alt="Modifier le Deck"
-            />
-          </div>
-          <div @click="openDeleteDeckModal(index)" class="trash">
-            <img
-              src="@/assets/icons/trash.svg"
-              title="Supprimer le deck"
-              alt="Supprimer le Deck"
-            />
-          </div>
+
+            <div class="options">
+                <div @click="$emit('showCards')">
+                <div class="eye">
+                    <img
+                    src="@/assets/icons/eye.svg"
+                    title="Afficher les cartes du deck"
+                    alt="Afficher les cartes du deck"
+                    />
+                </div>
+                </div>
+                <div @click="$emit('modifyDeck')" class="pen">
+                <img
+                    src="@/assets/icons/pen.svg"
+                    title="Modifier le deck"
+                    alt="Modifier le Deck"
+                />
+                </div>
+                <div @click="$emit('deleteDeck')" class="trash">
+                <img
+                    src="@/assets/icons/trash.svg"
+                    title="Supprimer le deck"
+                    alt="Supprimer le Deck"
+                />
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!--  Affichage Détaillé -->
-
-
-    <div v-if="displayMode == 'details'" class="deck-container" >
-      <div class="deck-item" v-for="(deck, index) in filteredDecks" :key="deck._id">
-        <div class="deck-title"><strong>{{ deck.title }}</strong><br /></div>
-        <div class="deck-description"><i>{{ deck.description }}</i></div>
-        <div class="deck-capacity">
-          <p v-if="deck.flashcards.length == 0">Deck vide</p>
-          <p v-else-if="deck.flashcards.length == 1">1 carte</p>
-          <p v-else>{{ deck.flashcards.length}} cartes</p>
-        </div>
-        <div class="options">
-          <div @click="showCards(deck._id)">
-            <div class="eye">
-              <img
-                src="@/assets/icons/eye.svg"
-                title="Afficher les cartes du deck"
-                alt="Afficher les cartes du deck"
-              />
+    <div v-if="display == 'list'" class="deck-container-list">
+        <div class="deck-item">
+            <div class="deck-title"><strong>{{ props.deckTitle }}</strong><br /></div>
+            <div class="deck-description"><i>{{ props.deckDescription }}</i></div>
+            <div class="deck-capacity">
+                <p v-if="props.deckLength == 0">Deck vide</p>
+                <p v-else-if="props.deckLength == 1">1 carte</p>
+                <p v-else>{{ props.deckLength }} cartes</p>
             </div>
-          </div>
-          <div @click="openModifyDeckModal(index)" class="pen">
-            <img
-              src="@/assets/icons/pen.svg"
-              title="Modifier le deck"
-              alt="Modifier le Deck"
-            />
-          </div>
-          <div @click="openDeleteDeckModal(index)" class="trash">
-            <img
-              src="@/assets/icons/trash.svg"
-              title="Supprimer le deck"
-              alt="Supprimer le Deck"
-            />
-          </div>
+
+            <div class="options">
+                <div @click="$emit('showCards')">
+                <div class="eye">
+                    <img
+                    src="@/assets/icons/eye.svg"
+                    title="Afficher les cartes du deck"
+                    alt="Afficher les cartes du deck"
+                    />
+                </div>
+                </div>
+                <div @click="$emit('modifyDeck')" class="pen">
+                <img
+                    src="@/assets/icons/pen.svg"
+                    title="Modifier le deck"
+                    alt="Modifier le Deck"
+                />
+                </div>
+                <div @click="$emit('deleteDeck')" class="trash">
+                <img
+                    src="@/assets/icons/trash.svg"
+                    title="Supprimer le deck"
+                    alt="Supprimer le Deck"
+                />
+                </div>
+            </div>
         </div>
-      </div>
     </div>
+
+
+
 
 </template>
 
 <script setup>
 
-import { ref } from 'vue';
+const props = defineProps({
+    display: String,
+    deckTitle: String,
+    deckDescription: String,
+    deckLength: Number,
+    deckCreatedDate: Date
+})
+                  
+defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
 
-const deckTitle = ref('');
-const deckDescription = ref('');
-const deckLength = ref('');
 
 </script>
 
 <style scoped>
 
+/* 
+    Affichage simple 
+*/
 
-.deck-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  grid-gap: 20px;
-  max-width: 100%;
+
+
+.deck-container-simple .deck-item {
+  width: 90%;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background: #f0f0f0;
+  border: 4px solid black;
+  border-radius: 8px;
   padding: 1rem;
-  box-sizing: border-box;
-  overflow: hidden;
+  background-color: rgb(255, 244, 224);
+  font-size: clamp(0.75rem, 4vw, 1.4rem);
 }
+
+
+.deck-container-simple .options {
+    display: flex;
+    gap: 15px;
+}
+
+.deck-container-simple .options img {
+  height: 30px;
+  width: 30px;
+}
+
+/* 
+    Affichage en liste 
+*/
+
+.deck-container-list {
+  display: flex;
+  align-items: stretch;
+}
+
+
+.deck-container-list .deck-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+  width: 100%;
+  background-color: rgb(255, 244, 224);
+  font-size: clamp(0.75rem, 4vw, 1.4rem);
+}
+
+.deck-container-list > div:nth-child(even) .deck-item {
+  background-color: #ffddb7;
+}
+
+.deck-container-list .deck-title {
+    margin-left: 0.5rem;
+    width: 200px;
+    min-width: 40%;
+    overflow-wrap: break-word; 
+
+}
+
+.deck-container-list .deck-description {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60%;
+    text-align: center;
+    box-sizing: border-box;
+    overflow-wrap: break-word; 
+
+}
+
+.deck-container-list .deck-capacity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40%;
+    text-align: center;
+    box-sizing: border-box;
+    word-wrap: break-word;  
+}
+
+.deck-container-list .options {
+    display: flex;
+    gap: 15px;
+    margin-right: 0.5rem;
+}
+
+.deck-container-list .options img {
+  height: 20px;
+  width: 20px;
+}
+
 
 .deck-container p {
   font-size: clamp(0.75rem, 4vw, 1.4rem);
@@ -110,25 +201,12 @@ const deckLength = ref('');
 }
 
 .deck-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    padding: 1rem;
-    border: 4px solid black;
-    border-radius: 8px;
-    background-color: rgb(255, 244, 224);
-    font-size: 1.4rem;
+  display: flex;
 }
+
  
 .deck-capacity p{
     margin: 0;
-}
-
-.options {
-    display: flex;
-    gap: 3rem;
-    margin-top: 1rem;
 }
 
 .options img {
@@ -141,6 +219,21 @@ const deckLength = ref('');
 .pen {
     cursor: pointer;
 }
+
+/*  
+.deck-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    padding: 1rem;
+    border: 4px solid black;
+    border-radius: 8px;
+    background-color: rgb(255, 244, 224);
+    font-size: 1.4rem;
+}
+
+*/
 
 
 </style>
