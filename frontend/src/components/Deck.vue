@@ -103,8 +103,8 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
 
 
 .deck-container-simple .deck-item {
-  width: 90%;
-  height: 120px;
+  width: 100%;
+  height: 160px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -116,6 +116,7 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
   padding: 1rem;
   background-color: rgb(255, 244, 224);
   font-size: clamp(0.75rem, 4vw, 1.4rem);
+  box-sizing: border-box;
 }
 
 

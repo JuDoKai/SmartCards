@@ -35,8 +35,8 @@
     :currentPage="currentPage" 
     @pageChanged="changePage" 
   />
-
-  <div v-if="displayMode == 'simple'" class="deck-container-simple">
+  <div class="decks-container">
+     <div :class="displayMode === 'simple' ? 'deck-container-simple' : 'deck-container-list'">
     <div v-for="deck in paginatedDecks" :key="deck._id">
       <Deck
         :display="displayMode"
@@ -50,19 +50,9 @@
     </div>
   </div>
 
-  <div v-if="displayMode == 'list'" class="deck-container-list">
-    <div v-for="deck in paginatedDecks" :key="deck._id">
-      <Deck
-        :display="displayMode"
-        :deckTitle="deck.title"
-        :deckDescription="deck.description"
-        :deckLength="deck.flashcards.length"
-        @showCards="showCards(deck._id)"
-        @modifyDeck="openModifyDeckModal(deck._id)"
-        @deleteDeck="openDeleteDeckModal(deck._id)"
-      />
-    </div>
+
   </div>
+ 
 
   <!-- Modal de modification -->
   <div v-if="isModalOpenPen" class="overlay">

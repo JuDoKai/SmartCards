@@ -1,20 +1,22 @@
 <template>
-    <div class="pagination">
-      <button class="left" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
-        &lt;
-      </button>
-  
-      <ul class="page-buttons">
-        <li v-for="page in totalPages" :key="page">
-          <button @click="changePage(page)" :class="{ active: currentPage === page }">
-            {{ page }}
-          </button>
-        </li>
-      </ul>
-  
-      <button class="right" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
-        &gt;
-      </button>
+    <div class="pagination-container">
+        <div class="pagination">
+        <button class="left" @click="changePage(currentPage - 1)" :disabled="currentPage === 1">
+            &lt;
+        </button>
+    
+        <ul class="page-buttons">
+            <li v-for="page in totalPages" :key="page">
+            <button @click="changePage(page)" :class="{ active: currentPage === page }">
+                {{ page }}
+            </button>
+            </li>
+        </ul>
+    
+        <button class="right" @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
+            &gt;
+        </button>
+        </div>
     </div>
   </template>
   
@@ -46,6 +48,7 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    margin-bottom: 20px;
 }
 
 .pagination {
