@@ -159,7 +159,7 @@ module.exports.generateFlashcards = async (req, res) => {
             Primaire: "questions simples et adaptées aux enfants en école primaire.",
             Collège: "questions adaptées aux élèves du collège, avec une difficulté modérée.",
             Lycée: "questions complexes adaptées aux élèves du lycée.",
-            Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires.",
+            Universitaire: "questions approfondies et complexes adaptées aux étudiants universitaires. Pas plus de 10 mots",
         };
 
         if (!levelDescriptions[level]) {

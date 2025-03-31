@@ -127,8 +127,9 @@ const newDeck = async () => {
     const response = await createDeck(props.userId, deckData);
     console.log("Deck créé avec succès :", response);
 
-    emit('deckCreated');
-    closeForm();
+    emit('deckCreated', response);
+
+    closeForm(); 
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Erreur lors de la création du deck.';
     console.error(error);
@@ -136,6 +137,7 @@ const newDeck = async () => {
     isLoading.value = false;
   }
 };
+
 
 const newDeckIA = async () => {
   isLoading.value = true;

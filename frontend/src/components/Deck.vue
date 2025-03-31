@@ -102,7 +102,6 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
 */
 
 
-
 .deck-container-simple .deck-item {
   width: 90%;
   height: 120px;

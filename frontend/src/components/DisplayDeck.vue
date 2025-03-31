@@ -1,11 +1,12 @@
 <template>
-    <h1>Vos Decks</h1>
-    <div class="container" v-if="user.decks.length == 0">
-      <span class="empty-list">La liste de deck est vide...</span>
-    </div>
+  <h1>Vos Decks</h1>
 
-    <div class="organization">
-      <div class="sort">
+  <div class="container" v-if="decks.length == 0">
+    <span class="empty-list">La liste de decks est vide...</span>
+  </div>
+
+  <div class="organization">
+    <div class="sort">
       <form @submit.prevent="sortDeck">
         <label for="sort">Tri : </label>
         <select v-model="sortMode" name="sort" @change="sortDeck">
@@ -17,144 +18,145 @@
         </select>
       </form>
     </div>
-      <div class="display">
-        <form @submit.prevent="DisplayDeck">
-          <label for="display">Affichage : </label>
-          <select v-model="displayMode" name="display" @change="DisplayDeck">
-            <option value="simple">Simple</option>
-            <option value="list">Liste</option>
-          </select>
-        </form>
-      </div>
+
+    <div class="display">
+      <form @submit.prevent="DisplayDeck">
+        <label for="display">Affichage : </label>
+        <select v-model="displayMode" name="display" @change="DisplayDeck">
+          <option value="simple">Simple</option>
+          <option value="list">Liste</option>
+        </select>
+      </form>
     </div>
+  </div>
 
+  <Pagination 
+    :decks="sortedDecks" 
+    :currentPage="currentPage" 
+    @pageChanged="changePage" 
+  />
 
-
-    <div v-if="displayMode == 'simple'" class="deck-container-simple" >
-      <div v-for="deck in sortedDecks" :key="deck._id">
-        <Deck
-          :display="displayMode"
-          :deckTitle="deck.title"
-          :deckDescription="deck.description"
-          :deckLength="deck.flashcards.length"
-          @showCards="showCards(deck._id)"
-          @modifyDeck="openModifyDeckModal(deck._id)"
-          @deleteDeck="openDeleteDeckModal(deck._id)"
-        />
-      </div>
+  <div v-if="displayMode == 'simple'" class="deck-container-simple">
+    <div v-for="deck in paginatedDecks" :key="deck._id">
+      <Deck
+        :display="displayMode"
+        :deckTitle="deck.title"
+        :deckDescription="deck.description"
+        :deckLength="deck.flashcards.length"
+        @showCards="showCards(deck._id)"
+        @modifyDeck="openModifyDeckModal(deck._id)"
+        @deleteDeck="openDeleteDeckModal(deck._id)"
+      />
     </div>
+  </div>
 
-    <div v-if="displayMode == 'list'" class="deck-container-list" >
-      <div v-for="deck in sortedDecks" :key="deck._id">
-        <Deck
-          :display="displayMode"
-          :deckTitle="deck.title"
-          :deckDescription="deck.description"
-          :deckLength="deck.flashcards.length"
-          @showCards="showCards(deck._id)"
-          @modifyDeck="openModifyDeckModal(deck._id)"
-          @deleteDeck="openDeleteDeckModal(deck._id)"
-        />
-      </div>
+  <div v-if="displayMode == 'list'" class="deck-container-list">
+    <div v-for="deck in paginatedDecks" :key="deck._id">
+      <Deck
+        :display="displayMode"
+        :deckTitle="deck.title"
+        :deckDescription="deck.description"
+        :deckLength="deck.flashcards.length"
+        @showCards="showCards(deck._id)"
+        @modifyDeck="openModifyDeckModal(deck._id)"
+        @deleteDeck="openDeleteDeckModal(deck._id)"
+      />
     </div>
+  </div>
 
-    <div v-if="isModalOpenPen" class="overlay">
-      <div class="modal">
-        <strong><p>Modifier Deck</p></strong>
+  <!-- Modal de modification -->
+  <div v-if="isModalOpenPen" class="overlay">
+    <div class="modal">
+      <h3>Modifier Deck</h3>
+      <form @submit.prevent="confirmModifyDeck">
+        <div class="form-slot">
+          <label for="title">Titre :</label>
+          <input type="text" v-model="deckTitle" required />
+        </div>
+        <div class="form-slot">
+          <label for="description">Description :</label>
+          <input type="text" v-model="deckDescription" />
+        </div>
 
-        <form @submit.prevent="newDeck">
-          <div class="form-slot">
-            <label for="title">Titre du Deck </label>
-            <input type="text" v-model.trim="deckTitle" required />
-          </div>
-          <div class="form-slot">
-            <label for="description">Description (recommandé) </label>
-            <input type="text" v-model.trim="deckDescription" />
-          </div>
-          <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-          <div class="buttons">
-            <button type="submit" :disabled="deckTitle.trim().length === 0" @click="confirmModifyDeck">Valider</button>
-            <button type="button" @click="closeModal">Annuler</button>
-          </div>
-          </form>
-      </div>
-    </div>
-  
-    <div v-if="isModalOpenTrash" class="overlay">
-      <div class="modal">
-        <strong><p>Supprimer Deck</p></strong>
+        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 
-        <p>Voulez-vous supprimer définitivement le deck <strong>{{ deckTitle }}</strong> ?</p>
         <div class="buttons">
-          <button type="button" @click="confirmDeleteDeck">Valider</button>
+          <button type="submit">Valider</button>
           <button type="button" @click="closeModal">Annuler</button>
         </div>
-       
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de suppression -->
+  <div v-if="isModalOpenTrash" class="overlay">
+    <div class="modal">
+      <h3>Supprimer Deck</h3>
+      <p>Voulez-vous vraiment supprimer <strong>{{ deckTitle }}</strong> ?</p>
+
+      <div class="buttons">
+        <button type="button" @click="confirmDeleteDeck">Supprimer</button>
+        <button type="button" @click="closeModal">Annuler</button>
       </div>
     </div>
-
+  </div>
 </template>
-  
+
 <script setup>
-
-import { ref, computed } from "vue";
+import { ref, computed, defineEmits } from "vue";
 import router from "@/router";
-import { deleteDeck, updateDeck } from "../../services/apiService";
+import { deleteDeck, updateDeck } from '../../services/apiService';
 import Deck from "./Deck.vue";
+import Pagination from "./Pagination.vue";
 
+const props = defineProps({
+  decks: Array,
+});
 
-const isModalOpenTrash = ref(false);
-const isModalOpenPen = ref(false);
-const selectedDeckIndex = ref(null);
+const emit = defineEmits(["deckUpdated", "deckDeleted"]);
+
 const deckTitle = ref("");
 const deckDescription = ref("");
 const sortMode = ref("default");
 const displayMode = ref("simple");
-
-
+const selectedDeckIndex = ref(null);
+const currentPage = ref(1);
+const decksPerPage = 10;
+const isModalOpenPen = ref(false);
+const isModalOpenTrash = ref(false);
 const errorMessage = ref("");
 
+const sortedDecks = computed(() => {
+  let sorted = [...props.decks];
 
-const user = defineProps({
-  decks: Array,
+  if (sortMode.value === "alphabetical") {
+    sorted.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortMode.value === "chronological") {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortMode.value === "ascending") {
+    sorted.sort((a, b) => a.flashcards.length - b.flashcards.length);
+  } else if (sortMode.value === "descending") {
+    sorted.sort((a, b) => b.flashcards.length - a.flashcards.length);
+  }
+
+  return sorted;
 });
 
+const paginatedDecks = computed(() => {
+  const start = (currentPage.value - 1) * decksPerPage;
+  return sortedDecks.value.slice(start, start + decksPerPage);
+});
 
-const openDeleteDeckModal = (deckId) => {
-  const deck = user.decks.find(d => d._id === deckId);
-  if (deck) {
-    selectedDeckIndex.value = deckId;
-    deckTitle.value = deck.title;
-    isModalOpenTrash.value = true;
-  }
-};
-const confirmDeleteDeck = async () => {
-  try {
-    await deleteDeck(selectedDeckIndex.value);
-    const indexToDelete = user.decks.findIndex(d => d._id === selectedDeckIndex.value);
-    if (indexToDelete !== -1) {
-      user.decks.splice(indexToDelete, 1);
-    }
-    closeModal();
-    console.log("Deck supprimé :", selectedDeckIndex.value);
-  } catch (error) {
-    console.error("Erreur lors de la suppression du deck :", error);
-  }
+const changePage = (newPage) => {
+  currentPage.value = newPage;
 };
 
-const closeModal = () => {
-  isModalOpenTrash.value = false;
-  isModalOpenPen.value = false;
-
-  selectedDeckIndex.value = null;
-  deckTitle.value = "";
-  deckDescription.value = "";
-  errorMessage.value = ""; 
+const showCards = (id) => {
+  router.push(`/dashboard/${id}`);
 };
-
 
 const openModifyDeckModal = (deckId) => {
-  const deck = user.decks.find(d => d._id === deckId);
+  const deck = sortedDecks.value.find(d => d._id === deckId);
   if (deck) {
     selectedDeckIndex.value = deckId;
     deckTitle.value = deck.title;
@@ -162,8 +164,6 @@ const openModifyDeckModal = (deckId) => {
     isModalOpenPen.value = true;
   }
 };
-
-
 
 const confirmModifyDeck = async () => {
   const deckId = selectedDeckIndex.value;
@@ -174,11 +174,13 @@ const confirmModifyDeck = async () => {
 
   try {
     await updateDeck(deckId, deckData);
-    const deckToUpdate = user.decks.find(d => d._id === deckId);
+
+    const deckToUpdate = props.decks.find(d => d._id === deckId);
     if (deckToUpdate) {
-      deckToUpdate.title = deckData.title;
+      deckToUpdate.title = deckData.title;       
       deckToUpdate.description = deckData.description;
     }
+
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la modification du deck :", error);
@@ -187,25 +189,42 @@ const confirmModifyDeck = async () => {
 };
 
 
-const showCards = (id) => {
-    router.push(`/dashboard/${id}`);
-}
+const openDeleteDeckModal = (deckId) => {
+  const deck = sortedDecks.value.find(d => d._id === deckId);
+  if (deck) {
+    selectedDeckIndex.value = deckId;
+    deckTitle.value = deck.title;
+    isModalOpenTrash.value = true;
+  }
+};
 
-const sortedDecks = computed(() => {
-  if (sortMode.value === "alphabetical") {
-    return [...user.decks].sort((a, b) => a.title.localeCompare(b.title));
-  } else if (sortMode.value === "chronological") {
-    return [...user.decks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  } else if (sortMode.value === "ascending") {
-    return [...user.decks].sort((a, b) => a.flashcards.length - b.flashcards.length);
-  } else if (sortMode.value === "descending") {
-    return [...user.decks].sort((a, b) => b.flashcards.length - a.flashcards.length);
-  } 
-  return user.decks;
+const confirmDeleteDeck = async () => {
+  try {
+    await deleteDeck(selectedDeckIndex.value);
+    
+    const indexToDelete = props.decks.findIndex(d => d._id === selectedDeckIndex.value);
+    if (indexToDelete !== -1) {
+      props.decks.splice(indexToDelete, 1);  
+    }
 
-});
+    closeModal();
+    console.log("Deck supprimé :", selectedDeckIndex.value);
+  } catch (error) {
+    console.error("Erreur lors de la suppression du deck :", error);
+  }
+};
 
+
+const closeModal = () => {
+  isModalOpenPen.value = false;
+  isModalOpenTrash.value = false;
+  selectedDeckIndex.value = null;
+  deckTitle.value = "";
+  deckDescription.value = "";
+  errorMessage.value = "";
+};
 </script>
+
 
 
 <style scoped>
@@ -238,12 +257,12 @@ h1 {
 }
 
 .modal {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
 }
 
 
