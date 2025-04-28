@@ -1,36 +1,36 @@
 <template>
-
-<main>
+  <main>
     <div class="dashboard">
-      <Navbar :name="userName"/>
-      <div class="display-flashcards">
+      <Navbar :name="userName" />
 
-         <CreateFlashcards
-         :deckId="deckId"
-         :deckTitle="deckTitle"
-         :deckDescription="deckDescription"
-         @flashcardCreated="addNewFlashcard"
-         @flashcardDeleted="flashcardDeleted"
-         />
-       
+      <!-- Loader s'affiche pendant le chargement -->
+      <Loader v-if="isLoading" />
+
+      <div v-else class="display-flashcards">
+        <CreateFlashcards
+          :deckId="deckId"
+          :deckTitle="deckTitle"
+          :deckDescription="deckDescription"
+          @flashcardCreated="addNewFlashcard"
+          @flashcardDeleted="flashcardDeleted"
+        />
+        
         <DisplayFlashcards 
-        :flashcards="flashcards"
-        :deckTitle="deckTitle"
+          :flashcards="flashcards"
+          :deckTitle="deckTitle"
         />
       </div>
     </div>
   </main>
-
 </template>
-
 
 <script setup>
 import Navbar from '@/components/Navbar.vue';
 import CreateFlashcards from '@/components/CreateFlashcards.vue';
 import DisplayFlashcards from '@/components/DisplayFlashcards.vue';
+import Loader from '@/components/Loader.vue';
 import { ref, onMounted } from 'vue';
-
-import { getUserById, getDecksByUserId, getAllFlashcardsByDeckId, getDeckByDeckId } from '../../services/apiService';
+import { getAllFlashcardsByDeckId, getDeckByDeckId } from '../../services/apiService';
 
 const props = defineProps(["id"]);
 const deckId = props["id"];
@@ -38,7 +38,7 @@ const flashcards = ref([]);
 const deckTitle = ref('');
 const deckDescription = ref('');
 const userName = ref('');
-
+const isLoading = ref(true); // État du chargement
 
 onMounted(async () => {
   try {
@@ -47,42 +47,15 @@ onMounted(async () => {
     
     const data2 = await getDeckByDeckId(deckId);
     userName.value = data2.user.username;
-
     deckTitle.value = data2.title;
     deckDescription.value = data2.description;
-
-    // const data3 = await getUserById();
-
   } catch (error) {
     console.error("Erreur lors du chargement des flashcards:", error);
+  } finally {
+    isLoading.value = false; // Fin du chargement
   }
 });
-
-
-const addNewFlashcard = async () => {
-  try {
-    // Recharge tous les flashcards du deck depuis l'API
-    flashcards.value = await getAllFlashcardsByDeckId(deckId);
-  } catch (error) {
-    console.error("Erreur lors du rechargement des flashcards :", error);
-  }
-};
-
-
-
-const flashcardDeleted = async () => {
-  try {
-    // Recharge tous les flashcards du deck depuis l'API
-    flashcards.value = await  getAllFlashcardsByDeckId(deckId);
-  } catch (error) {
-    console.error("Erreur lors du rechargement des decks :", error);
-  }
-};
-
-
-
 </script>
-
 
 <style scoped>
 main {

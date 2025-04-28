@@ -50,7 +50,7 @@
             <strong><p>Création de Flashcard (IA)</p></strong>
             <label for="flashcardsNumber">Nombre de flashcards </label>
             <select v-model="flashcardsNumber" name="flashcardsNumber">
-              <option v-for="n in 15" :key="n" :value="n">{{ n }}</option>
+              <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
             </select>
           </div>
   

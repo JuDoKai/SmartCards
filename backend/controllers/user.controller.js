@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const Joi = require("joi");
 const UserModel = require('../models/user.model');
 
 module.exports.register = async (req, res, next) => {

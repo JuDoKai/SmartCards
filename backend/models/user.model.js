@@ -3,14 +3,32 @@ const bcrypt = require("bcrypt");
 
 const userSchema = mongoose.Schema(
     {
-        username: { type: String, required: true, unique: true },
+        username: { 
+            type: String,
+            required: [true, "Le nom d'utilisateur est requis"],
+            unique: true,
+            minlength: [3, "Minimum 3 caractères"],
+            maxlength: [20, "Maximum 20 caractères"],
+            match: [/^[A-Za-zÀ-ÖØ-öø-ÿ0-9_]+$/, "Le nom d'utilisateur ne doit contenir que des lettres, chiffres et _"],
+            trim: true,
+        },
         email: {
             type: String,
-            required: true,
+            required: [true, "L'email est requis"],
             unique: true,
             match: [/.+\@.+\..+/, "Veuillez entrer une adresse email valide"],
-        },
-        password: { type: String, required: true },
+            lowercase: true,
+            trim: true,
+          },
+          password: {
+            type: String,
+            required: [true, "Le mot de passe est requis"],
+            minlength: [8, "Le mot de passe doit contenir au moins 8 caractères"],
+            match: [
+                /^(?=.*[a-zA-ZÀ-ÖØ-öø-ÿ])(?=.*[A-ZÀ-ÖØ-Þ])(?=.*\d)(?=.*[^A-Za-zÀ-ÖØ-öø-ÿ0-9])[\S]{8,}$/,
+                "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial",
+            ],
+          },
         decks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Deck' }],
     },
     { timestamps: true } 

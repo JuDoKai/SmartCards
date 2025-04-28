@@ -1,7 +1,7 @@
 <template>
   <main>
     <div class="dashboard">
-      <Navbar :name="userName"/>
+      <Navbar :name="userName" />
       <div class="display-deck">
         <CreateDeck 
           :userId="decoded.userId" 
@@ -9,8 +9,10 @@
         />
         <DisplayDeck 
           :decks="userDecks"
+          :userId="decoded.userId" 
           @deckUpdated="updateDeck"
           @deckDeleted="removeDeck"
+          @allDecksDeleted="removeAllDecks"
         />
       </div>
     </div>
@@ -55,10 +57,13 @@ const removeDeck = (deckId) => {
   userDecks.value = userDecks.value.filter(deck => deck._id !== deckId);
 };
 
+const removeAllDecks = (userId) => {
+  userDecks.value = [];
+};
+
 </script>
 
 <style scoped>
-
 main {
   height: 100%;
   margin: 0;
@@ -68,5 +73,4 @@ main {
 .dashboard {
   width: 100%;
 }
-
 </style>

@@ -68,6 +68,11 @@ export const deleteDeck = async (deckId) => {
     return response.data;
 };
 
+export const deleteAllDeckByUser = async (userId) => {
+    const response = await axios.delete(`${BASE_URL}/decks/user/${userId}`);
+    return response.data;
+};
+
 // ✅ Endpoint Flashcards
 
 export const getAllFlashcards = async () => {

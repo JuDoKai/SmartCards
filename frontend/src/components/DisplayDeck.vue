@@ -1,15 +1,11 @@
 <template>
   <h1>Vos Decks</h1>
 
-  <div class="container" v-if="decks.length == 0">
-    <span class="empty-list">La liste de decks est vide...</span>
-  </div>
-
   <div class="organization">
     <div class="sort">
-      <form @submit.prevent="sortDeck">
+      <form @submit.prevent>
         <label for="sort">Tri : </label>
-        <select v-model="sortMode" name="sort" @change="sortDeck">
+        <select id="sort" v-model="sortMode" name="sort" @change="sortDeck">
           <option value="default">Défaut</option>
           <option value="alphabetical">Alphabétique</option>
           <option value="chronological">Chronologique</option>
@@ -20,9 +16,9 @@
     </div>
 
     <div class="display">
-      <form @submit.prevent="DisplayDeck">
+      <form @submit.prevent>
         <label for="display">Affichage : </label>
-        <select v-model="displayMode" name="display" @change="DisplayDeck">
+        <select id="display" v-model="displayMode" name="display">
           <option value="simple">Simple</option>
           <option value="list">Liste</option>
         </select>
@@ -30,31 +26,38 @@
     </div>
   </div>
 
+  <div class="container" v-if="props.decks.length === 0">
+    <span class="empty-list">La liste de decks est vide...</span>
+  </div>
+
   <Pagination 
+    v-if="sortedDecks.length > 0"
     :decks="sortedDecks" 
     :currentPage="currentPage" 
     @pageChanged="changePage" 
   />
+
   <div class="decks-container">
-     <div :class="displayMode === 'simple' ? 'deck-container-simple' : 'deck-container-list'">
-    <div v-for="deck in paginatedDecks" :key="deck._id">
-      <Deck
-        :display="displayMode"
-        :deckTitle="deck.title"
-        :deckDescription="deck.description"
-        :deckLength="deck.flashcards.length"
-        @showCards="showCards(deck._id)"
-        @modifyDeck="openModifyDeckModal(deck._id)"
-        @deleteDeck="openDeleteDeckModal(deck._id)"
-      />
+    <div :class="displayMode === 'simple' ? 'deck-container-simple' : 'deck-container-list'">
+      <div v-for="deck in paginatedDecks" :key="deck._id">
+        <Deck
+          :display="displayMode"
+          :deckTitle="deck.title"
+          :deckDescription="deck.description"
+          :deckLength="deck.flashcards.length"
+          @showCards="showCards(deck._id)"
+          @modifyDeck="openModifyDeckModal(deck)"
+          @deleteDeck="openDeleteDeckModal(deck)"
+        />
+      </div>
     </div>
+
+    <button class="delete-all" v-if="paginatedDecks.length > 0" @click="isModalOpenDeleteAll = true">
+      Tout Supprimer
+    </button>
   </div>
 
-
-  </div>
- 
-
-  <!-- Modal de modification -->
+  <!-- Modals (modify / delete / delete all) -->
   <div v-if="isModalOpenPen" class="overlay">
     <div class="modal">
       <h3>Modifier Deck</h3>
@@ -78,7 +81,6 @@
     </div>
   </div>
 
-  <!-- Modal de suppression -->
   <div v-if="isModalOpenTrash" class="overlay">
     <div class="modal">
       <h3>Supprimer Deck</h3>
@@ -90,35 +92,51 @@
       </div>
     </div>
   </div>
+
+  <div v-if="isModalOpenDeleteAll" class="overlay">
+    <div class="modal">
+      <h3>Supprimer tous les decks</h3>
+      <p>Êtes-vous sûr de vouloir supprimer <strong>tous vos decks</strong> ? Cette action est irréversible.</p>
+
+      <div class="buttons">
+        <button type="button" @click="confirmDeleteAllDecks">Supprimer tout</button>
+        <button type="button" @click="isModalOpenDeleteAll = false">Annuler</button>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
 import { ref, computed, defineEmits } from "vue";
 import router from "@/router";
-import { deleteDeck, updateDeck } from '../../services/apiService';
+import { deleteDeck, deleteAllDeckByUser, updateDeck } from '../../services/apiService';
 import Deck from "./Deck.vue";
 import Pagination from "./Pagination.vue";
 
 const props = defineProps({
   decks: Array,
+  userId: String
 });
 
-const emit = defineEmits(["deckUpdated", "deckDeleted"]);
+const emit = defineEmits(["deckUpdated", "deckDeleted", "allDecksDeleted"]);
 
 const deckTitle = ref("");
 const deckDescription = ref("");
 const sortMode = ref("default");
 const displayMode = ref("simple");
-const selectedDeckIndex = ref(null);
+const selectedDeckId = ref(null);
 const currentPage = ref(1);
 const decksPerPage = 10;
 const isModalOpenPen = ref(false);
 const isModalOpenTrash = ref(false);
+const isModalOpenDeleteAll = ref(false);
+
 const errorMessage = ref("");
 
+// Tri
 const sortedDecks = computed(() => {
   let sorted = [...props.decks];
-
   if (sortMode.value === "alphabetical") {
     sorted.sort((a, b) => a.title.localeCompare(b.title));
   } else if (sortMode.value === "chronological") {
@@ -128,10 +146,10 @@ const sortedDecks = computed(() => {
   } else if (sortMode.value === "descending") {
     sorted.sort((a, b) => b.flashcards.length - a.flashcards.length);
   }
-
   return sorted;
 });
 
+// Pagination
 const paginatedDecks = computed(() => {
   const start = (currentPage.value - 1) * decksPerPage;
   return sortedDecks.value.slice(start, start + decksPerPage);
@@ -141,36 +159,36 @@ const changePage = (newPage) => {
   currentPage.value = newPage;
 };
 
-const showCards = (id) => {
-  router.push(`/dashboard/${id}`);
+const sortDeck = () => {
+  currentPage.value = 1;
 };
 
-const openModifyDeckModal = (deckId) => {
-  const deck = sortedDecks.value.find(d => d._id === deckId);
-  if (deck) {
-    selectedDeckIndex.value = deckId;
-    deckTitle.value = deck.title;
-    deckDescription.value = deck.description;
-    isModalOpenPen.value = true;
+// Navigation
+const showCards = (id) => {
+  if (!id) {
+    console.error("ID du deck non défini !");
+    return;
   }
+  router.push(`/dashboard/${id}`);
+};
+// Modification
+const openModifyDeckModal = (deck) => {
+  selectedDeckId.value = deck._id;
+  deckTitle.value = deck.title;
+  deckDescription.value = deck.description || "";
+  isModalOpenPen.value = true;
 };
 
 const confirmModifyDeck = async () => {
-  const deckId = selectedDeckIndex.value;
+  const deckId = selectedDeckId.value;
   const deckData = {
     title: deckTitle.value.trim(),
     description: deckDescription.value.trim(),
   };
 
   try {
-    await updateDeck(deckId, deckData);
-
-    const deckToUpdate = props.decks.find(d => d._id === deckId);
-    if (deckToUpdate) {
-      deckToUpdate.title = deckData.title;       
-      deckToUpdate.description = deckData.description;
-    }
-
+    const updatedDeck = await updateDeck(deckId, deckData);
+    emit("deckUpdated", updatedDeck); 
     closeModal();
   } catch (error) {
     console.error("Erreur lors de la modification du deck :", error);
@@ -178,44 +196,47 @@ const confirmModifyDeck = async () => {
   }
 };
 
-
-const openDeleteDeckModal = (deckId) => {
-  const deck = sortedDecks.value.find(d => d._id === deckId);
-  if (deck) {
-    selectedDeckIndex.value = deckId;
-    deckTitle.value = deck.title;
-    isModalOpenTrash.value = true;
-  }
+// Suppression
+const openDeleteDeckModal = (deck) => {
+  selectedDeckId.value = deck._id;
+  deckTitle.value = deck.title;
+  isModalOpenTrash.value = true;
 };
 
 const confirmDeleteDeck = async () => {
   try {
-    await deleteDeck(selectedDeckIndex.value);
-    
-    const indexToDelete = props.decks.findIndex(d => d._id === selectedDeckIndex.value);
-    if (indexToDelete !== -1) {
-      props.decks.splice(indexToDelete, 1);  
-    }
-
+    await deleteDeck(selectedDeckId.value);
+    emit("deckDeleted", selectedDeckId.value);
+    currentPage.value = 1;
     closeModal();
-    console.log("Deck supprimé :", selectedDeckIndex.value);
   } catch (error) {
     console.error("Erreur lors de la suppression du deck :", error);
   }
 };
 
+const confirmDeleteAllDecks = async () => {
+  try {
+    await deleteAllDeckByUser(props.userId);
+    emit("allDecksDeleted", []); 
+    isModalOpenDeleteAll.value = false;
+    currentPage.value = 1;
+  } catch (error) {
+    console.error("Erreur lors de la suppression de tous les decks :", error);
+  }
+};
 
+
+// Reset des modals
 const closeModal = () => {
   isModalOpenPen.value = false;
   isModalOpenTrash.value = false;
-  selectedDeckIndex.value = null;
+  isModalOpenDeleteAll.value = false;
+  selectedDeckId.value = null;
   deckTitle.value = "";
   deckDescription.value = "";
   errorMessage.value = "";
 };
 </script>
-
-
 
 <style scoped>
 
@@ -263,6 +284,14 @@ h1 {
   opacity: 0.5;
 }
 
+.decks-container {
+  position: relative;
+}
+
+.decks-container .deck-container-list {
+  display: flex;
+  flex-direction: column;
+}
 
 .deck-container p {
   font-size: clamp(0.75rem, 4vw, 1.4rem);
@@ -318,8 +347,20 @@ button {
     border: none;
 }
 
-button:hover {
+.buttons button:hover {
     background-color: #b96500;
+}
+
+.delete-all {
+  background-color: rgb(180, 21, 21);
+  border: 5px solid black;
+  margin-top: 3rem ;
+
+
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%,-70%);
 }
 
 

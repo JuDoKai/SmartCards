@@ -36,8 +36,11 @@
         </div>
 
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <button type="submit">Valider</button>
-        <button type="button" @click="closeForm">Annuler</button>
+        <div class="buttons">
+          <button type="submit">Valider</button>
+          <button type="button" @click="closeForm">Annuler</button>
+        </div>
+       
       </form>
     </div>
 
@@ -57,7 +60,7 @@
         <div class="form-slot">
           <label for="flashcardsNumber">Nombre de flashcards </label>
           <select v-model="flashcardsNumber" name="flashcardsNumber">
-            <option v-for="n in 15" :key="n" :value="n">{{ n }}</option>
+            <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
           </select>
         </div>
 
@@ -72,8 +75,10 @@
         </div>
 
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <button type="submit">Valider</button>
-        <button type="button" @click="closeForm">Annuler</button>
+        <div class="buttons">
+          <button type="submit">Valider</button>
+          <button type="button" @click="closeForm">Annuler</button>
+        </div>
       </form>
     </div>
 
@@ -82,7 +87,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { createDeck } from '../../services/apiService';
+import { createDeck, getDecksByUserId } from '../../services/apiService';
 import Loader from './Loader.vue';
 
 const props = defineProps({
@@ -138,7 +143,6 @@ const newDeck = async () => {
   }
 };
 
-
 const newDeckIA = async () => {
   isLoading.value = true;
   try {
@@ -152,9 +156,15 @@ const newDeckIA = async () => {
     console.log("Données envoyées au backend :", deckData);
 
     const response = await createDeck(props.userId, deckData);
-    console.log("Deck créé avec succès :", response);
+    console.log("Deck créé avec succès :", response.deck);
 
-    emit('deckCreated');
+    const updatedDeck = await getDecksByUserId(response.deck._id);
+
+
+    emit('deckCreated', updatedDeck);
+
+    
+
     closeForm();
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Erreur lors de la création du deck.';
@@ -163,6 +173,8 @@ const newDeckIA = async () => {
     isLoading.value = false;
   }
 };
+
+
 </script>
 
 <style scoped>
@@ -194,8 +206,25 @@ h1 {
     max-width: 400px;
 }
 
+
 .form-slot {
-    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.form-slot input {
+    align-self: center;
+    width: 100%;
+    padding: 0.5rem 0 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid #d9d9d9;
+}
+
+.form-slot input:focus {
+    outline: 2px solid;
 }
 
 .deck-options {
@@ -219,6 +248,32 @@ h1 {
   background-color: rgb(255, 244, 224);
   border: 4px solid black;
   border-radius: 8px;
+}
+
+.option-title:active {
+  background-color: rgb(247, 229, 195);
+}
+
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.buttons button {
+    color: #fefcfb;
+    background-color: #cf7600;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    border: none;
+}
+
+.buttons button:hover {
+    background-color: #b96500;
 }
 
 .container :nth-child(2)  {

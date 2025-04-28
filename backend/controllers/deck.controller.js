@@ -36,7 +36,7 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
         const user = await User.findById(id);
         if (user) {
             const decks = await Deck.find({ user: id }).populate("user", "username").exec();
-            return res.status(decks.length ? 200 : 404).json(decks.length ? decks : { message: "Aucun deck trouvé pour cet utilisateur." });
+            return res.status(200).json(decks);
         }
 
         // Vérifier si l'ID correspond à un deck
@@ -50,6 +50,7 @@ module.exports.getAllDecksByUserIdOrDeckId = async (req, res) => {
         });
     }
 };
+
 
 /**
  * ✅ Génère des flashcards par batchs en demandant à OpenAI.
@@ -117,23 +118,60 @@ module.exports.createDeck = async (req, res) => {
         if (!levelDescriptions[level]) return res.status(400).json({ message: "Niveau scolaire invalide." });
 
         const topic = `${title}: ${description}`;
-        const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
 
         let generatedFlashcards = [];
-        for (const response of aiResponses) {
-            try {
-                const rawText = response.choices[0]?.message?.content?.trim().replace(/```json|```/g, "").trim();
-                const parsedFlashcards = JSON.parse(rawText);
-                if (Array.isArray(parsedFlashcards)) generatedFlashcards.push(...parsedFlashcards);
-            } catch (error) {
-                console.error("❌ Erreur de parsing JSON:", error);
+        let attemptCount = 0;  // Compteur pour limiter les tentatives
+        const maxAttempts = 5;  // Nombre maximum de tentatives pour générer les flashcards
+        let uniqueFlashcards = new Set();  // Pour suivre les questions-réponses uniques générées
+
+        while (generatedFlashcards.length < number && attemptCount < maxAttempts) {
+            attemptCount++;
+
+            // Générer un lot de flashcards via OpenAI
+            const aiResponses = await generateFlashcardsInBatches(topic, levelDescriptions[level], number);
+
+            let newBatchFlashcards = [];
+            for (const response of aiResponses) {
+                try {
+                    const rawText = response.choices[0]?.message?.content?.trim().replace(/```json|```/g, "").trim();
+                    const parsedFlashcards = JSON.parse(rawText);
+                    if (Array.isArray(parsedFlashcards)) newBatchFlashcards.push(...parsedFlashcards);
+                } catch (error) {
+                    console.error("❌ Erreur de parsing JSON:", error);
+                }
+            }
+
+            // Vérifie si de nouvelles flashcards ont été générées
+            if (newBatchFlashcards.length > 0) {
+                // Ajouter les nouvelles flashcards aux anciennes et vérifier les doublons
+                newBatchFlashcards.forEach((flashcard) => {
+                    const flashcardKey = `${flashcard.question}-${flashcard.answer}`;
+                    if (!uniqueFlashcards.has(flashcardKey)) {
+                        uniqueFlashcards.add(flashcardKey);
+                        generatedFlashcards.push(flashcard);
+                    }
+                });
+            }
+
+            // Vérifie si le nombre de flashcards nécessaires est atteint
+            if (generatedFlashcards.length >= number) {
+                break;  // Terminer la boucle si on a atteint le nombre requis
+            }
+
+            // Si on dépasse le nombre maximal de tentatives, renvoyer une erreur
+            if (attemptCount >= maxAttempts) {
+                return res.status(400).json({
+                    message: "Impossible de générer suffisamment de flashcards uniques après plusieurs tentatives.",
+                    generated: generatedFlashcards.length,
+                    maxAttempts: attemptCount
+                });
             }
         }
 
-        if (generatedFlashcards.length === 0) return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
-
-        const duplicateFlashcards = await checkDuplicateFlashcards(generatedFlashcards);
-        if (duplicateFlashcards.length > 0) return res.status(400).json({ message: "Flashcards en doublon.", duplicates: duplicateFlashcards });
+        // Si aucune flashcard n'a été générée ou trop de doublons, retourner une erreur
+        if (generatedFlashcards.length === 0) {
+            return res.status(500).json({ message: "Aucune flashcard générée ou doublons excessifs." });
+        }
 
         const flashcardsToInsert = generatedFlashcards.map((flashcard) => ({
             question: flashcard.question,
@@ -185,3 +223,26 @@ module.exports.deleteDeck = async (req, res) => {
         res.status(400).json({ message: "Erreur lors de la suppression.", error: error.message });
     }
 };
+
+module.exports.deleteAllDecksByUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const userDecks = await Deck.find({ user: userId });
+        if (!userDecks || userDecks.length === 0) {
+            return res.status(404).json({ message: "Aucun deck trouvé pour cet utilisateur." });
+        }
+
+        const deckIds = userDecks.map(deck => deck._id);
+
+        await Flashcard.deleteMany({ deck: { $in: deckIds } });
+        await Deck.deleteMany({ user: userId });
+        await User.findByIdAndUpdate(userId, { $set: { decks: [] } });
+
+        res.status(200).json({ message: "Tous les decks et leurs flashcards ont été supprimés." });
+
+    } catch (error) {
+        res.status(500).json({ message: "Erreur lors de la suppression des decks.", error: error.message });
+    }
+};
+

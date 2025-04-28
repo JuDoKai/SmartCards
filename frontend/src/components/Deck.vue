@@ -119,6 +119,10 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
   box-sizing: border-box;
 }
 
+.deck-container-simple .deck-item:active {
+    background-color: rgb(247, 229, 195);;
+} 
+
 
 .deck-container-simple .options {
     display: flex;
@@ -197,7 +201,6 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
 
 .deck-container p {
   font-size: clamp(0.75rem, 4vw, 1.4rem);
- 
 }
 
 .deck-item {
@@ -219,21 +222,6 @@ defineEmits(["showCards", "modifyDeck", "deleteDeck"]);
 .pen {
     cursor: pointer;
 }
-
-/*  
-.deck-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    padding: 1rem;
-    border: 4px solid black;
-    border-radius: 8px;
-    background-color: rgb(255, 244, 224);
-    font-size: 1.4rem;
-}
-
-*/
 
 
 </style>

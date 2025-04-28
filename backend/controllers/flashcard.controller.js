@@ -7,6 +7,8 @@ const openaiClient = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+const stringSimilarity = require('string-similarity');
+
 
 module.exports.getAllFlashcards = async (req, res) => {
     try {
@@ -145,6 +147,22 @@ const checkDuplicateFlashcards = async (flashcards) => {
     return existingFlashcards.map(fc => `${fc.question} - ${fc.answer}`);
 };
 
+const removeSimilarFlashcards = (flashcards, threshold = 0.8) => {
+    const unique = [];
+
+    for (const flashcard of flashcards) {
+        const isDuplicate = unique.some(existing =>
+            stringSimilarity.compareTwoStrings(existing.question, flashcard.question) > threshold
+        );
+
+        if (!isDuplicate) {
+            unique.push(flashcard);
+        }
+    }
+
+    return unique;
+};
+
 module.exports.generateFlashcards = async (req, res) => {
     try {
         const { number, level } = req.body;
@@ -187,6 +205,9 @@ module.exports.generateFlashcards = async (req, res) => {
                 console.error("Erreur de parsing JSON:", error);
             }
         }
+
+        // ✅ Supprimer les questions trop similaires
+        generatedFlashcards = removeSimilarFlashcards(generatedFlashcards);
 
         if (generatedFlashcards.length === 0) {
             return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
