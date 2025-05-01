@@ -36,8 +36,10 @@
   
         
           <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-          <button type="submit">Valider</button>
-          <button type="button" @click="closeForm">Annuler</button>
+          <div class="buttons">
+            <button type="submit">Valider</button>
+            <button type="button" @click="closeForm">Annuler</button>
+          </div>
         </form>
     </div>
 
@@ -65,8 +67,10 @@
           </div>
   
           <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-          <button type="submit">Valider</button>
-          <button type="button" @click="closeForm">Annuler</button>
+          <div class="buttons">
+            <button type="submit">Valider</button>
+            <button type="button" @click="closeForm">Annuler</button>
+          </div>
         </form>
       </div>
   </div>
@@ -207,6 +211,28 @@ h1 {
   background-color: rgb(255, 244, 224);
   border: 4px solid black;
   border-radius: 8px;
+}
+
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.buttons button {
+    color: #fefcfb;
+    background-color: #cf7600;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    border: none;
+}
+
+.buttons button:hover {
+    background-color: #b96500;
 }
 
 

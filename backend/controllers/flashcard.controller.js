@@ -206,8 +206,10 @@ module.exports.generateFlashcards = async (req, res) => {
             }
         }
 
-        // ✅ Supprimer les questions trop similaires
         generatedFlashcards = removeSimilarFlashcards(generatedFlashcards);
+
+        generatedFlashcards = generatedFlashcards.slice(0, number);
+
 
         if (generatedFlashcards.length === 0) {
             return res.status(500).json({ message: "Erreur de format dans la réponse de l'API." });
