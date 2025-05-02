@@ -2,13 +2,15 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { ref } from 'vue';
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 const username = ref('');
 const email = ref('');
 const password = ref('');
 
 export const login = async ({ username, password }) => {
     try {
-        const response = await axios.post(`${API_URL}/auth/login`, {
+        const response = await axios.post(`${BASE_URL}/auth/login`, {
             username,
             password,
         });
@@ -27,7 +29,7 @@ export const login = async ({ username, password }) => {
 
 export const register = async ({ username, email, password }) => {
     try {
-        const response = await axios.post('http://localhost:5000/auth/register', {
+        const response = await axios.post(`${BASE_URL}/auth/register`, {
             username,
             email,
             password,
