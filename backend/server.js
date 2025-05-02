@@ -14,15 +14,17 @@ connectDB();
 
 const app = express();
 
+const corsOptions = {
+    origin: 'https://smartcards-frontend.onrender.com',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    credentials: true,
+  };
+  
+  app.use(cors(corsOptions));
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.use(cors({
-    origin: 'https://smartcards-frontend.onrender.com',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
 
 // Routes
 app.use('/auth', authRoutes);
