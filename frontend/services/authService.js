@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { ref } from 'vue';
 import router from '../src/router'; 
-import { useAuth } from '../src/composables/useAuth';
+import { useAuth } from '@/composables/useAuth';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -10,6 +10,9 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 const username = ref('');
 const email = ref('');
 const password = ref('');
+
+console.log('useAuth:', useAuth);
+
 
 export const login = async ({ username, password }) => {
     try {
