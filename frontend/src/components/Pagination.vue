@@ -73,6 +73,7 @@ button {
   }
   
 .page-buttons {
+    color: black;
     display: flex;
     gap: 8px;
     list-style: none;
