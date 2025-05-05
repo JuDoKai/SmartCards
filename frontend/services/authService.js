@@ -4,6 +4,7 @@ import { ref } from 'vue';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+
 const username = ref('');
 const email = ref('');
 const password = ref('');

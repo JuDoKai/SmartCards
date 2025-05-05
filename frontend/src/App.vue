@@ -7,6 +7,11 @@
 </template>
 
 <script setup>
+import { useAuth } from './composables/useAuth';
+
+const { loadSession } = useAuth();
+
+loadSession();
 
 </script>
 

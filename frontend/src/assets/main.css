@@ -82,6 +82,31 @@ html {
   }
 }
 
+.deck-options .option-title {
+  color: black;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.buttons button {
+    color: #fefcfb;
+    background-color: #cf7600;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 700;
+    border: none;
+}
+
+.buttons button:hover {
+    background-color: #b96500;
+}
+
 .form-slot {
   display: flex;
   flex-direction: column;

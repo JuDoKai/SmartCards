@@ -84,8 +84,10 @@
           <input type="text" v-model.trim="answer" required />
         </div>
         <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <button type="submit" :disabled="question.trim().length === 0 || answer.trim().length === 0">Valider</button>
-        <button type="button" @click="closeModal">Annuler</button>
+        <div class="buttons">
+          <button type="submit" :disabled="question.trim().length === 0 || answer.trim().length === 0">Valider</button>
+          <button type="button" @click="closeModal">Annuler</button>
+        </div>
       </form>
     </div>
   </div>
@@ -94,8 +96,10 @@
   <div v-if="isModalRemoveOpen" class="overlay">
     <div class="modal">
       <p>Voulez-vous supprimer définitivement la Flashcard ?</p>
-      <button type="button" @click="confirmDeleteFlashcard">Valider</button>
-      <button type="button" @click="closeModal">Annuler</button>
+      <div class="buttons">
+        <button type="button" @click="confirmDeleteFlashcard">Valider</button>
+        <button type="button" @click="closeModal">Annuler</button>
+      </div>
     </div>
   </div>
 </template>
