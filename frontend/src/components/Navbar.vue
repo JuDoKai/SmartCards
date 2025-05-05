@@ -70,14 +70,14 @@ import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'vue-router';
 import { ref, onMounted, onUnmounted } from 'vue';
 
+const authStore = useAuthStore();
+const router = useRouter()
+
 const user = defineProps({
     name: String
 });
 
 const logout = () => {
-  const authStore = useAuthStore();
-  const router = useRouter();
-
   authStore.logout();
   router.push('/');
 };
