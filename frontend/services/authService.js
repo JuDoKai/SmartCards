@@ -2,7 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { ref } from 'vue';
 import router from '../src/router'; 
-import { useAuth } from '../composables/useAuth';
+import { useAuth } from '../src/composables/useAuth';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
