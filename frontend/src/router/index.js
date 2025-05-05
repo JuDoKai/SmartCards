@@ -16,7 +16,18 @@ const router = createRouter({
       name: 'dashboard',
       component: DashboardView,
       meta: { requiresAuth: true }
-    }
+    },
+    {
+      path: '/dashboard/:id',
+      name: 'flashcards',
+      props: true,
+      component: FlashcardsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      component: 404,
+      }
   ]
 });
 
