@@ -9,7 +9,8 @@ const routes = [
   {
     path: '/',
     name: 'auth',
-    component: AuthView
+    component: AuthView,
+    meta: { requiresAuth: false }
   },
   {
     path: '/dashboard',
@@ -32,18 +33,16 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('authToken');
-  const isAuthenticated = !!token;
+  const { isAuthenticated } = useAuth();
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    return next('/');
+  if (to.path === '/' && isAuthenticated.value) {
+    return next('/dashboard');
   }
 
-  if (to.path === '/' && isAuthenticated) {
-    return next('/dashboard');
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    return next('/');
   }
 
   next();
 });
-
 export default router;
