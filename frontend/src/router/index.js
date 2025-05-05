@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/authStore';
 import AuthView from '../views/AuthView.vue';
 import DashboardView from '../views/DashboardView.vue';
+import FlashcardsView from '@/views/FlashcardsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,8 +21,8 @@ const router = createRouter({
     {
       path: '/dashboard/:id',
       name: 'flashcards',
-      props: true,
       component: FlashcardsView,
+      props: true,
       meta: { requiresAuth: true }
     },
     {
