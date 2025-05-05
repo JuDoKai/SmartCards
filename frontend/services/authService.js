@@ -1,6 +1,8 @@
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { ref } from 'vue';
+import router from '../router'; 
+import { useAuth } from '../composables/useAuth';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -18,6 +20,11 @@ export const login = async ({ username, password }) => {
 
         const token = response.data.token;
         localStorage.setItem('authToken', token);
+
+        const { setToken } = useAuth();
+        setToken(token);
+
+        router.push('/dashboard');
 
         console.log('Connexion réussie', token);
       

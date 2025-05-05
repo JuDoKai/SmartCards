@@ -32,13 +32,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('authToken');
+  const isAuthenticated = !!token;
 
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
+  if (to.meta.requiresAuth && !isAuthenticated) {
     return next('/');
   }
 
-  if (to.path === '/' && isAuthenticated.value) {
+  if (to.path === '/' && isAuthenticated) {
     return next('/dashboard');
   }
 

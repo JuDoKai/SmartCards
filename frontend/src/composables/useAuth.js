@@ -3,7 +3,6 @@ import { jwtDecode } from 'jwt-decode';
 
 const token = ref(localStorage.getItem('authToken') || null);
 const user = ref(token.value ? jwtDecode(token.value) : null);
-
 const isAuthenticated = computed(() => !!user.value);
 
 function setToken(newToken) {
@@ -18,19 +17,6 @@ function logout() {
   localStorage.removeItem('authToken');
 }
 
-function loadSession() {
-  const storedToken = localStorage.getItem('authToken');
-  if (storedToken) {
-    try {
-      token.value = storedToken;
-      user.value = jwtDecode(storedToken);
-    } catch (err) {
-      console.error('Invalid token:', err);
-      logout();
-    }
-  }
-}
-
 export function useAuth() {
   return {
     token,
@@ -38,6 +24,5 @@ export function useAuth() {
     isAuthenticated,
     setToken,
     logout,
-    loadSession, 
   };
 }
