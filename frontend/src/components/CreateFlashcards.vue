@@ -192,7 +192,7 @@ h1 {
 }
 
 .flashcards-options {
-  color: black;
+ 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -210,6 +210,7 @@ h1 {
   padding: 0 1rem 0 1rem;
   cursor: pointer;
   background-color: rgb(255, 244, 224);
+  color: black;
   border: 4px solid black;
   border-radius: 8px;
 }
