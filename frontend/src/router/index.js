@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/authStore';
 import AuthView from '../views/AuthView.vue';
 import DashboardView from '../views/DashboardView.vue';
 import FlashcardsView from '@/views/FlashcardsView.vue';
+import NotFound from '@/views/NotFound.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,9 +27,10 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: "/:pathMatch(.*)*",
-      component: 404,
-      }
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: NotFound
+    }
   ]
 });
 
