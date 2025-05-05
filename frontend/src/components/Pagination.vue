@@ -68,7 +68,7 @@ button {
     cursor: pointer;
     background-color: rgb(255, 244, 224);
     font-weight: 700;
-    border: 4px solid black;
+    border: 2px solid black;
     border-radius: 8px;
   }
   
@@ -101,7 +101,7 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 3px solid black;
+    border: 2px solid black;
     background-color: rgb(255, 244, 224);
     font-weight: 700;
     border-radius: 8px;
