@@ -192,6 +192,7 @@ h1 {
 }
 
 .flashcards-options {
+  color: black;
   display: flex;
   align-items: center;
   justify-content: center;
