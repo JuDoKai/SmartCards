@@ -66,7 +66,8 @@
 </template>
 
 <script setup>
-import router from '@/router';
+import { useAuthStore } from '@/stores/authStore';
+import { useRouter } from 'vue-router';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 const user = defineProps({
@@ -74,10 +75,12 @@ const user = defineProps({
 });
 
 const logout = () => {
-    localStorage.removeItem('authToken');
+  const authStore = useAuthStore();
+  const router = useRouter();
 
-    router.push('/');
-}
+  authStore.logout();
+  router.push('/');
+};
 
 const isSmallScreen = ref(false);
 const isMenuOpen = ref(false);

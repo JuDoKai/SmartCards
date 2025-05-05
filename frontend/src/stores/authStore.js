@@ -1,3 +1,4 @@
+// stores/authStore.js
 import { defineStore } from 'pinia';
 import { jwtDecode } from 'jwt-decode';
 
@@ -6,30 +7,26 @@ export const useAuthStore = defineStore('auth', {
     token: localStorage.getItem('authToken') || null,
     user: null,
   }),
-
   getters: {
-    isAuthenticated: (state) => !!state.user,
+    isAuthenticated: (state) => !!state.token,
   },
-
   actions: {
-    setToken(newToken) {
-      this.token = newToken;
-      localStorage.setItem('authToken', newToken);
-      this.user = jwtDecode(newToken);
+    setToken(token) {
+      this.token = token;
+      localStorage.setItem('authToken', token);
+      this.user = jwtDecode(token);
     },
-
     logout() {
       this.token = null;
       this.user = null;
       localStorage.removeItem('authToken');
     },
-
-    checkToken() {
+    restoreUser() {
       if (this.token) {
         try {
           this.user = jwtDecode(this.token);
-        } catch (error) {
-          this.logout();
+        } catch (e) {
+          this.logout()
         }
       }
     },
