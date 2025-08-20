@@ -108,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from "vue";
+import { ref, computed } from "vue";
 import router from "@/router";
 import { deleteDeck, deleteAllDeckByUser, updateDeck } from '../../services/apiService';
 import Deck from "./Deck.vue";
