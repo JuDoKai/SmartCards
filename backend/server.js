@@ -11,14 +11,23 @@ const port = process.env.PORT || 4000;
 connectDB();
 
 // CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://smartcards-frontend.onrender.com',
+];
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS non autorisé pour cette origine'));
+    }
+  },
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
-
-console.log("CORS allowed origin:", process.env.CLIENT_URL);
 
 // Middleware
 app.use(cors(corsOptions));
